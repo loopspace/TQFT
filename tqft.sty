@@ -1,0 +1,1761 @@
+\ProvidesPackage{tqft}
+
+\newdimen\pgf@tqft@north
+\newdimen\pgf@tqft@south
+\newdimen\pgf@tqft@east
+\newdimen\pgf@tqft@west
+\newdimen\pgf@tqft@bdry@width
+\newdimen\pgf@tqft@bdry@depth
+\newdimen\pgf@tqft@midx
+\newdimen\pgf@tqft@midy
+\newdimen\pgf@tqft@ctrla
+\newdimen\pgf@tqft@ctrlb
+
+\def\pgf@tqft@minus{-}
+\let\pgf@tqft@upper\@empty
+\let\pgf@tqft@lower\pgf@tqft@minus
+
+\newif\ifpgf@tqft@fill@under
+\newif\ifpgf@tqft@stroke@under
+
+\pgfkeys{/pgf/.cd,
+  tqft cobordism height/.initial=2cm,
+  tqft boundary separation/.initial=2cm,
+  tqft circle width/.initial=10pt,
+  tqft circle depth/.initial=5pt,
+  tqft flow/.initial=south,
+  tqft view from/.is choice,
+  tqft view from/incoming/.code={\let\pgf@tqft@upper\pgf@tqft@minus\let\pgf@tqft@lower\@empty},
+  tqft view from/outgoing/.code={\let\pgf@tqft@lower\pgf@tqft@minus\let\pgf@tqft@upper\@empty},
+  tqft boundary lower style contents/.initial={},
+  tqft boundary lower style/.code={\pgfkeys{/pgf/tqft boundary lower style contents/.style={/tikz/.cd,#1}}},
+  tqft boundary style contents/.initial={},
+  tqft boundary style/.code={\pgfkeys{/pgf/tqft boundary style contents/.style={/tikz/.cd,#1}}},
+  tqft boundary upper style contents/.initial={},
+  tqft boundary upper style/.code={\pgfkeys{/pgf/tqft boundary upper style contents/.style={/tikz/.cd,#1}}},
+  tqft cobordism style contents/.initial={},
+  tqft cobordism style/.code={\pgfkeys{/pgf/tqft cobordism style contents/.style={/tikz/.cd,#1}}},
+}
+
+% The direction of the flow sets up a transformation to be applied to
+% the node shapes; this complicates the anchors a little as they look
+% different from the inside and the outside
+\def\pgf@tqft@flow@south{}
+\def\pgf@tqft@flow@north{\pgftransformxscale{-1}\pgftransformrotate{180}}
+\def\pgf@tqft@flow@east{\pgftransformyscale{-1}\pgftransformrotate{90}}
+\def\pgf@tqft@flow@west{\pgftransformrotate{270}}
+
+\pgfdeclareshape{pair of pants}
+{
+  % All we really need to know is our height and boundary separation
+  \savedanchor{\tqft@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft boundary separation}
+  }
+
+  \savedanchor{\tqft@bdry@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft circle depth}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft circle width}
+  }
+    
+
+  % location of boundary components as seen from outside
+  % same as inside except that we apply the ``flow transformation''
+  % we save them as the ``flow transformation'' might change between
+  % the node's use and the anchors' use
+  \savedanchor{\ext@inbdry}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+    \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{\pgf@xa}{.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+  \savedanchor{\ext@outbdrya}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+    \pgf@xa=\pgfkeysvalueof{/pgf/tqft boundary separation}
+    \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{-.5\pgf@xa}{-.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+  \savedanchor{\ext@outbdryb}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+    \pgf@xa=\pgfkeysvalueof{/pgf/tqft boundary separation}
+    \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{.5\pgf@xa}{-.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+    
+  % Externally available anchors
+  \anchor{centre}{\pgfpointorigin}
+  \anchor{center}{\pgfpointorigin}
+  \anchor{incoming boundary}{\ext@inbdry}
+  \anchor{outgoing boundary 1}{\ext@outbdrya}
+  \anchor{outgoing boundary 2}{\ext@outbdryb}
+
+
+  % background path
+  \backgroundpath{
+    % find out our desired size
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    % figure out our coordinates, using the internal anchors
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=.5\pgf@x
+    \pgf@tqft@west=-.5\pgf@x
+    % apply the flow transformation
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    % set east to the eastern side of the eastern bdry
+    \advance\pgf@tqft@east by \pgf@tqft@bdry@width
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by \pgf@tqft@bdry@width
+    % heights of control points
+    \pgf@tqft@ctrla=\pgf@tqft@north
+    \advance\pgf@tqft@ctrla by -4\pgf@tqft@bdry@depth
+    \pgf@tqft@ctrlb=\pgf@tqft@south
+    \advance\pgf@tqft@ctrlb by 4\pgf@tqft@bdry@depth
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the upper part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % curve down to eastern bdry
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+    
+    % reset east to the western edge
+    \advance\pgf@tqft@east by -2\pgf@tqft@bdry@width
+
+    % draw the upper part of the eastern boundary component
+    \pgfpatharc{0}{\pgf@tqft@upper180}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % draw the cobordism between the eastern and western boundaries
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}
+    
+    % draw the upper part of the western boundary component
+    \pgfpatharc{0}{\pgf@tqft@upper180}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % reset west to the western edge
+    \advance\pgf@tqft@west by -2\pgf@tqft@bdry@width
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+    \pgfpathclose
+  }
+
+  \behindbackgroundpath{%
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=.5\pgf@x
+    \pgf@tqft@west=-.5\pgf@x
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary style contents}
+      \tikz@mode
+      \tikz@options
+      % First we fill the boundary ellipses
+      \pgfpathellipse{\pgfqpoint{0pt}{\pgf@tqft@north}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \pgfpathellipse{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \pgfpathellipse{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@fill fill,\fi%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+    }
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary lower style contents}
+      \tikz@mode
+      \tikz@options
+      % Next, we stroke the lower parts of the boundary ellipses
+    % set east to the eastern side of the eastern bdry
+    \advance\pgf@tqft@east by -\pgf@tqft@bdry@width
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by -\pgf@tqft@bdry@width
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the western boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the eastern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+
+  }
+
+  \beforebackgroundpath{%
+    % After drawing the main background path, we draw the outer edge
+    % of the cobordism and the upper pieces of the boundaries
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=.5\pgf@x
+    \pgf@tqft@west=-.5\pgf@x
+%    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      % First we stroke the boundary of the cobordism itself
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft cobordism style contents}
+      \tikz@mode
+      \tikz@options
+
+    % set east to the eastern side of the eastern bdry
+    \advance\pgf@tqft@east by \pgf@tqft@bdry@width
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by \pgf@tqft@bdry@width
+    % heights of control points
+    \pgf@tqft@ctrla=\pgf@tqft@north
+    \advance\pgf@tqft@ctrla by -4\pgf@tqft@bdry@depth
+    \pgf@tqft@ctrlb=\pgf@tqft@south
+    \advance\pgf@tqft@ctrlb by 4\pgf@tqft@bdry@depth
+
+    % start at the eastern edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % curve down to eastern bdry
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+    % reset east to the western edge
+    \advance\pgf@tqft@east by -2\pgf@tqft@bdry@width
+
+    % move to the western edge the upper part of the eastern boundary
+      \pgfpathmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+
+    % draw the cobordism between the eastern and western boundaries
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}
+
+    % reset west to the western edge
+    \advance\pgf@tqft@west by -2\pgf@tqft@bdry@width
+
+    % move to the western edge the upper part of the eastern boundary
+      \pgfpathmoveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}
+
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+    {
+      % Next, we stroke the lower parts of the boundary ellipses
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary upper style contents}
+      \tikz@mode
+      \tikz@options
+    % set east to the eastern side of the eastern bdry
+    \advance\pgf@tqft@east by -\pgf@tqft@bdry@width
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by -\pgf@tqft@bdry@width
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the western boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the eastern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+  }
+}
+
+\pgfdeclareshape{reverse pair of pants}
+{
+  % All we really need to know is our height and boundary separation
+  \savedanchor{\tqft@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft boundary separation}
+  }
+
+  \savedanchor{\tqft@bdry@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft circle depth}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft circle width}
+  }
+    
+
+  % location of boundary components as seen from outside
+  % same as inside except that we apply the ``flow transformation''
+  % we save them as the ``flow transformation'' might change between
+  % the node's use and the anchors' use
+  \savedanchor{\ext@outbdry}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+    \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{\pgf@xa}{-.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+  \savedanchor{\ext@inbdrya}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+    \pgf@xa=\pgfkeysvalueof{/pgf/tqft boundary separation}
+    \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{-.5\pgf@xa}{.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+  \savedanchor{\ext@inbdryb}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+    \pgf@xa=\pgfkeysvalueof{/pgf/tqft boundary separation}
+    \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{.5\pgf@xa}{.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+    
+  % Externally available anchors
+  \anchor{centre}{\pgfpointorigin}
+  \anchor{center}{\pgfpointorigin}
+  \anchor{incoming boundary 1}{\ext@inbdrya}
+  \anchor{incoming boundary 2}{\ext@inbdryb}
+  \anchor{outgoing boundary}{\ext@outbdry}
+
+
+  % background path
+  \backgroundpath{
+    % find out our desired size
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    % figure out our coordinates, using the internal anchors
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=.5\pgf@x
+    \pgf@tqft@west=-.5\pgf@x
+    % apply the flow transformation
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    % set east to the eastern side of the eastern bdry
+    \advance\pgf@tqft@east by \pgf@tqft@bdry@width
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by \pgf@tqft@bdry@width
+    % heights of control points
+    \pgf@tqft@ctrla=\pgf@tqft@south
+    \advance\pgf@tqft@ctrla by 4\pgf@tqft@bdry@depth
+    \pgf@tqft@ctrlb=\pgf@tqft@north
+    \advance\pgf@tqft@ctrlb by -4\pgf@tqft@bdry@depth
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@south}}
+
+    % draw the upper part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % curve down to eastern bdry
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@north}}
+    
+    % reset east to the western edge
+    \advance\pgf@tqft@east by -2\pgf@tqft@bdry@width
+
+    % draw the upper part of the eastern boundary component
+    \pgfpatharc{0}{\pgf@tqft@upper180}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % draw the cobordism between the eastern and western boundaries
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@north}}
+    
+    % draw the upper part of the western boundary component
+    \pgfpatharc{0}{\pgf@tqft@upper180}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % reset west to the western edge
+    \advance\pgf@tqft@west by -2\pgf@tqft@bdry@width
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@south}}
+    \pgfpathclose
+  }
+
+  \behindbackgroundpath{%
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=.5\pgf@x
+    \pgf@tqft@west=-.5\pgf@x
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary style contents}
+      \tikz@mode
+      \tikz@options
+      % First we fill the boundary ellipses
+      \pgfpathellipse{\pgfqpoint{0pt}{\pgf@tqft@south}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \pgfpathellipse{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@north}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \pgfpathellipse{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@north}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@fill fill,\fi%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+    }
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary lower style contents}
+      \tikz@mode
+      \tikz@options
+      % Next, we stroke the lower parts of the boundary ellipses
+    % set east to the eastern side of the eastern bdry
+    \advance\pgf@tqft@east by -\pgf@tqft@bdry@width
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by -\pgf@tqft@bdry@width
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the western boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the eastern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+
+  }
+
+  \beforebackgroundpath{%
+    % After drawing the main background path, we draw the outer edge
+    % of the cobordism and the upper pieces of the boundaries
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=.5\pgf@x
+    \pgf@tqft@west=-.5\pgf@x
+%    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      % First we stroke the boundary of the cobordism itself
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft cobordism style contents}
+      \tikz@mode
+      \tikz@options
+
+    % set east to the eastern side of the eastern bdry
+    \advance\pgf@tqft@east by \pgf@tqft@bdry@width
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by \pgf@tqft@bdry@width
+    % heights of control points
+    \pgf@tqft@ctrla=\pgf@tqft@south
+    \advance\pgf@tqft@ctrla by 4\pgf@tqft@bdry@depth
+    \pgf@tqft@ctrlb=\pgf@tqft@north
+    \advance\pgf@tqft@ctrlb by -4\pgf@tqft@bdry@depth
+
+    % start at the eastern edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@south}}
+
+    % curve down to eastern bdry
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@north}}
+    % reset east to the western edge
+    \advance\pgf@tqft@east by -2\pgf@tqft@bdry@width
+
+    % move to the western edge the upper part of the eastern boundary
+      \pgfpathmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@north}}
+
+    % draw the cobordism between the eastern and western boundaries
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@north}}
+
+    % reset west to the western edge
+    \advance\pgf@tqft@west by -2\pgf@tqft@bdry@width
+
+    % move to the western edge the upper part of the eastern boundary
+      \pgfpathmoveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@north}}
+
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@south}}
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+    {
+      % Next, we stroke the lower parts of the boundary ellipses
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary upper style contents}
+      \tikz@mode
+      \tikz@options
+    % set east to the eastern side of the eastern bdry
+    \advance\pgf@tqft@east by -\pgf@tqft@bdry@width
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by -\pgf@tqft@bdry@width
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the western boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the eastern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+  }
+}
+
+\pgfdeclareshape{cylinder to prior}
+{
+  % All we really need to know is our height and boundary separation
+  \savedanchor{\tqft@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft boundary separation}
+  }
+
+  \savedanchor{\tqft@bdry@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft circle depth}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft circle width}
+  }
+    
+
+  % location of boundary components as seen from outside
+  % same as inside except that we apply the ``flow transformation''
+  % we save them as the ``flow transformation'' might change between
+  % the node's use and the anchors' use
+  \savedanchor{\ext@inbdry}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+    \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{\pgf@xa}{.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+  \savedanchor{\ext@outbdry}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+    \pgf@xa=\pgfkeysvalueof{/pgf/tqft boundary separation}
+    \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{-.5\pgf@xa}{-.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+    
+  % Externally available anchors
+  \anchor{centre}{\pgfpointorigin}
+  \anchor{center}{\pgfpointorigin}
+  \anchor{incoming boundary}{\ext@inbdry}
+  \anchor{outgoing boundary}{\ext@outbdry}
+
+  % background path
+  \backgroundpath{
+    % find out our desired size
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    % figure out our coordinates, using the internal anchors
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@west=-.5\pgf@x
+    % apply the flow transformation
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by \pgf@tqft@bdry@width
+    % heights of control points
+    \pgf@tqft@ctrla=\pgf@tqft@north
+    \advance\pgf@tqft@ctrla by -4\pgf@tqft@bdry@depth
+    \pgf@tqft@ctrlb=\pgf@tqft@south
+    \advance\pgf@tqft@ctrlb by 4\pgf@tqft@bdry@depth
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the upper part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % curve down to western bdry
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}
+    % draw the upper part of the western boundary component
+    \pgfpatharc{0}{\pgf@tqft@upper180}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % reset west to the western edge
+    \advance\pgf@tqft@west by -2\pgf@tqft@bdry@width
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+    \pgfpathclose
+  }
+
+  \behindbackgroundpath{%
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@west=-.5\pgf@x
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary style contents}
+      \tikz@mode
+      \tikz@options
+      % First we fill the boundary ellipses
+      \pgfpathellipse{\pgfqpoint{0pt}{\pgf@tqft@north}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \pgfpathellipse{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@fill fill,\fi%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+    }
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary lower style contents}
+      \tikz@mode
+      \tikz@options
+      % Next, we stroke the lower parts of the boundary ellipses
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by -\pgf@tqft@bdry@width
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the western boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+
+  }
+
+  \beforebackgroundpath{%
+    % After drawing the main background path, we draw the outer edge
+    % of the cobordism and the upper pieces of the boundaries
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@west=-.5\pgf@x
+%    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      % First we stroke the boundary of the cobordism itself
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft cobordism style contents}
+      \tikz@mode
+      \tikz@options
+
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by \pgf@tqft@bdry@width
+    % heights of control points
+    \pgf@tqft@ctrla=\pgf@tqft@north
+    \advance\pgf@tqft@ctrla by -4\pgf@tqft@bdry@depth
+    \pgf@tqft@ctrlb=\pgf@tqft@south
+    \advance\pgf@tqft@ctrlb by 4\pgf@tqft@bdry@depth
+
+    % start at the eastern edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % curve down to western bdry
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}
+    % reset west to the western edge
+    \advance\pgf@tqft@west by -2\pgf@tqft@bdry@width
+
+    % move to the western edge the upper part of the eastern boundary
+      \pgfpathmoveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}
+
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+    {
+      % Next, we stroke the lower parts of the boundary ellipses
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary upper style contents}
+      \tikz@mode
+      \tikz@options
+
+    % set west to the eastern side of the western bdry
+    \advance\pgf@tqft@west by -\pgf@tqft@bdry@width
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the western boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@west}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+  }
+}
+
+\pgfdeclareshape{cylinder to next}
+{
+  % All we really need to know is our height and boundary separation
+  \savedanchor{\tqft@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft boundary separation}
+  }
+
+  \savedanchor{\tqft@bdry@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft circle depth}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft circle width}
+  }
+    
+
+  % location of boundary components as seen from outside
+  % same as inside except that we apply the ``flow transformation''
+  % we save them as the ``flow transformation'' might change between
+  % the node's use and the anchors' use
+  \savedanchor{\ext@inbdry}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+    \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{\pgf@xa}{.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+  \savedanchor{\ext@outbdry}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+    \pgf@xa=\pgfkeysvalueof{/pgf/tqft boundary separation}
+    \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{.5\pgf@xa}{-.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+    
+  % Externally available anchors
+  \anchor{centre}{\pgfpointorigin}
+  \anchor{center}{\pgfpointorigin}
+  \anchor{incoming boundary}{\ext@inbdry}
+  \anchor{outgoing boundary}{\ext@outbdry}
+
+  % background path
+  \backgroundpath{
+    % find out our desired size
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    % figure out our coordinates, using the internal anchors
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=.5\pgf@x
+    % apply the flow transformation
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    % set east to the eastern side of the eastern bdry
+    \advance\pgf@tqft@east by \pgf@tqft@bdry@width
+    % heights of control points
+    \pgf@tqft@ctrla=\pgf@tqft@north
+    \advance\pgf@tqft@ctrla by -4\pgf@tqft@bdry@depth
+    \pgf@tqft@ctrlb=\pgf@tqft@south
+    \advance\pgf@tqft@ctrlb by 4\pgf@tqft@bdry@depth
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the upper part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % curve down to eastern bdry
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+    % draw the upper part of the eastern boundary component
+    \pgfpatharc{0}{\pgf@tqft@upper180}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % reset east to the western edge
+    \advance\pgf@tqft@east by -2\pgf@tqft@bdry@width
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+    \pgfpathclose
+  }
+
+  \behindbackgroundpath{%
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=.5\pgf@x
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary style contents}
+      \tikz@mode
+      \tikz@options
+      % First we fill the boundary ellipses
+      \pgfpathellipse{\pgfqpoint{0pt}{\pgf@tqft@north}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \pgfpathellipse{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@fill fill,\fi%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+    }
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary lower style contents}
+      \tikz@mode
+      \tikz@options
+      % Next, we stroke the lower parts of the boundary ellipses
+    % set east to the eastern side of the western bdry
+    \advance\pgf@tqft@east by -\pgf@tqft@bdry@width
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the eastern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+
+  }
+
+  \beforebackgroundpath{%
+    % After drawing the main background path, we draw the outer edge
+    % of the cobordism and the upper pieces of the boundaries
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=.5\pgf@x
+%    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      % First we stroke the boundary of the cobordism itself
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft cobordism style contents}
+      \tikz@mode
+      \tikz@options
+
+    % set east to the eastern side of the western bdry
+    \advance\pgf@tqft@east by \pgf@tqft@bdry@width
+    % heights of control points
+    \pgf@tqft@ctrla=\pgf@tqft@north
+    \advance\pgf@tqft@ctrla by -4\pgf@tqft@bdry@depth
+    \pgf@tqft@ctrlb=\pgf@tqft@south
+    \advance\pgf@tqft@ctrlb by 4\pgf@tqft@bdry@depth
+
+    % start at the eastern edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % curve down to eastern bdry
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+    % reset east to the western edge
+    \advance\pgf@tqft@east by -2\pgf@tqft@bdry@width
+
+    % move to the western edge the upper part of the eastern boundary
+      \pgfpathmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+    {
+      % Next, we stroke the lower parts of the boundary ellipses
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary upper style contents}
+      \tikz@mode
+      \tikz@options
+
+    % set east to the eastern side of the western bdry
+    \advance\pgf@tqft@east by -\pgf@tqft@bdry@width
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the eastern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+  }
+}
+
+\pgfdeclareshape{tqft cylinder}
+{
+  % All we really need to know is our height and boundary separation
+  \savedanchor{\tqft@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft boundary separation}
+  }
+
+  \savedanchor{\tqft@bdry@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft circle depth}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft circle width}
+  }
+    
+
+  % location of boundary components as seen from outside
+  % same as inside except that we apply the ``flow transformation''
+  % we save them as the ``flow transformation'' might change between
+  % the node's use and the anchors' use
+  \savedanchor{\ext@inbdry}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+    \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{\pgf@xa}{.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+  \savedanchor{\ext@outbdry}{%
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+    % Find our current origin
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+    % position of incoming boundary in internal coordinates 
+     \pgf@ya=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgfmoveto{\pgfpoint{.5\pgf@xa}{-.5\pgf@ya}}
+    % save these coordinates
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+    % absolute position
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+    % now relative to internal origin
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+  }
+    
+  % Externally available anchors
+  \anchor{centre}{\pgfpointorigin}
+  \anchor{center}{\pgfpointorigin}
+  \anchor{incoming boundary}{\ext@inbdry}
+  \anchor{outgoing boundary}{\ext@outbdry}
+
+  % background path
+  \backgroundpath{
+    % find out our desired size
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    % figure out our coordinates, using the internal anchors
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=0pt
+    % apply the flow transformation
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    % set east to the eastern side of the eastern bdry
+    \advance\pgf@tqft@east by \pgf@tqft@bdry@width
+    % heights of control points
+    \pgf@tqft@ctrla=\pgf@tqft@north
+    \advance\pgf@tqft@ctrla by -4\pgf@tqft@bdry@depth
+    \pgf@tqft@ctrlb=\pgf@tqft@south
+    \advance\pgf@tqft@ctrlb by 4\pgf@tqft@bdry@depth
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the upper part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % curve down to eastern bdry
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+    % draw the upper part of the eastern boundary component
+    \pgfpatharc{0}{\pgf@tqft@upper180}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % reset east to the western edge
+    \advance\pgf@tqft@east by -2\pgf@tqft@bdry@width
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+    \pgfpathclose
+  }
+
+  \behindbackgroundpath{%
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=0pt
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary style contents}
+      \tikz@mode
+      \tikz@options
+      % First we fill the boundary ellipses
+      \pgfpathellipse{\pgfqpoint{0pt}{\pgf@tqft@north}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \pgfpathellipse{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@fill fill,\fi%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+    }
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary lower style contents}
+      \tikz@mode
+      \tikz@options
+      % Next, we stroke the lower parts of the boundary ellipses
+    % set east to the eastern side of the western bdry
+    \advance\pgf@tqft@east by -\pgf@tqft@bdry@width
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the eastern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+
+  }
+
+  \beforebackgroundpath{%
+    % After drawing the main background path, we draw the outer edge
+    % of the cobordism and the upper pieces of the boundaries
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \tqft@size
+    \pgf@tqft@north=.5\pgf@y
+    \pgf@tqft@south=-.5\pgf@y
+    \pgf@tqft@east=0pt
+%    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      % First we stroke the boundary of the cobordism itself
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft cobordism style contents}
+      \tikz@mode
+      \tikz@options
+
+    % set east to the eastern side of the western bdry
+    \advance\pgf@tqft@east by \pgf@tqft@bdry@width
+    % heights of control points
+    \pgf@tqft@ctrla=\pgf@tqft@north
+    \advance\pgf@tqft@ctrla by -4\pgf@tqft@bdry@depth
+    \pgf@tqft@ctrlb=\pgf@tqft@south
+    \advance\pgf@tqft@ctrlb by 4\pgf@tqft@bdry@depth
+
+    % start at the eastern edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % curve down to eastern bdry
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+    % reset east to the western edge
+    \advance\pgf@tqft@east by -2\pgf@tqft@bdry@width
+
+    % move to the western edge the upper part of the eastern boundary
+      \pgfpathmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrla}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+    {
+      % Next, we stroke the lower parts of the boundary ellipses
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary upper style contents}
+      \tikz@mode
+      \tikz@options
+
+    % set east to the eastern side of the western bdry
+    \advance\pgf@tqft@east by -\pgf@tqft@bdry@width
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@north}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % start at the western edge of the eastern boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@east}{\pgf@tqft@south}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+  }
+}
+
+\pgfdeclareshape{tqft cap}
+{
+  % All we really need to know is our height and boundary separation
+  \savedanchor{\tqft@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft boundary separation}
+  }
+
+  \savedanchor{\tqft@bdry@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft circle depth}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft circle width}
+  }
+
+  % location of boundary components as seen from outside
+  % same as inside except that we apply the ``flow transformation''
+  % we save them as the ``flow transformation'' might change between
+  % the node's use and the anchors' use
+    
+  % Externally available anchors
+  \anchor{centre}{\pgfpointorigin}
+  \anchor{center}{\pgfpointorigin}
+  \anchor{outgoing boundary}{\pgfpointorigin}
+
+  % background path
+  \backgroundpath{
+    % find out our desired size
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    % apply the flow transformation
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    \pgf@tqft@ctrlb=4\pgf@tqft@bdry@depth
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{0pt}}
+
+    % draw the upper part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % draw the cap
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{0pt}}
+    \pgfpathclose
+  }
+
+  \behindbackgroundpath{%
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary style contents}
+      \tikz@mode
+      \tikz@options
+      % First we fill the boundary ellipses
+      \pgfpathellipse{\pgfqpoint{0pt}{0pt}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@fill fill,\fi%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+    }
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary lower style contents}
+      \tikz@mode
+      \tikz@options
+      % Next, we stroke the lower parts of the boundary ellipses
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{0pt}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+
+  }
+
+  \beforebackgroundpath{%
+    % After drawing the main background path, we draw the outer edge
+    % of the cobordism and the upper pieces of the boundaries
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+
+    {
+      % First we stroke the boundary of the cobordism itself
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft cobordism style contents}
+      \tikz@mode
+      \tikz@options
+
+    % heights of control points
+      \pgf@tqft@ctrlb=4\pgf@tqft@bdry@depth
+
+    % start at the eastern edge of the boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}
+
+    % curve over to western edge
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{0pt}}
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+    {
+      % Next, we stroke the lower parts of the boundary ellipses
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary upper style contents}
+      \tikz@mode
+      \tikz@options
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{0pt}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+  }
+}
+
+\pgfdeclareshape{tqft cup}
+{
+  % All we really need to know is our height and boundary separation
+  \savedanchor{\tqft@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft cobordism height}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft boundary separation}
+  }
+
+  \savedanchor{\tqft@bdry@size}{%
+    \pgf@y=\pgfkeysvalueof{/pgf/tqft circle depth}
+    \pgf@x=\pgfkeysvalueof{/pgf/tqft circle width}
+  }
+
+  % location of boundary components as seen from outside
+  % same as inside except that we apply the ``flow transformation''
+  % we save them as the ``flow transformation'' might change between
+  % the node's use and the anchors' use
+    
+  % Externally available anchors
+  \anchor{centre}{\pgfpointorigin}
+  \anchor{center}{\pgfpointorigin}
+  \anchor{incoming boundary}{\pgfpointorigin}
+
+  % background path
+  \backgroundpath{
+    % find out our desired size
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    % apply the flow transformation
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    \pgf@tqft@ctrlb=-4\pgf@tqft@bdry@depth
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{0pt}}
+
+    % draw the upper part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+    % draw the cap
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{0pt}}
+    \pgfpathclose
+  }
+
+  \behindbackgroundpath{%
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary style contents}
+      \tikz@mode
+      \tikz@options
+      % First we fill the boundary ellipses
+      \pgfpathellipse{\pgfqpoint{0pt}{0pt}}{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}{\pgfqpoint{0pt}{\pgf@tqft@bdry@depth}}
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@fill fill,\fi%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+    }
+    {
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary lower style contents}
+      \tikz@mode
+      \tikz@options
+      % Next, we stroke the lower parts of the boundary ellipses
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{0pt}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@lower180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+
+  }
+
+  \beforebackgroundpath{%
+    % After drawing the main background path, we draw the outer edge
+    % of the cobordism and the upper pieces of the boundaries
+    % figure out our coordinates, using the internal anchors
+    \tqft@bdry@size
+    \pgf@tqft@bdry@width=\pgf@x
+    \pgf@tqft@bdry@depth=\pgf@y
+
+    {
+      % First we stroke the boundary of the cobordism itself
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft cobordism style contents}
+      \tikz@mode
+      \tikz@options
+
+    % heights of control points
+      \pgf@tqft@ctrlb=-4\pgf@tqft@bdry@depth
+
+    % start at the eastern edge of the boundary
+    \pgfmoveto{\pgfqpoint{\pgf@tqft@bdry@width}{0pt}}
+
+    % curve over to western edge
+    \pgfpathcurveto{\pgfqpoint{\pgf@tqft@bdry@width}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{\pgf@tqft@ctrlb}}{\pgfqpoint{-\pgf@tqft@bdry@width}{0pt}}
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+    {
+      % Next, we stroke the lower parts of the boundary ellipses
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary upper style contents}
+      \tikz@mode
+      \tikz@options
+
+    % start at the western edge of the northern boundary
+    \pgfmoveto{\pgfqpoint{-\pgf@tqft@bdry@width}{0pt}}
+
+    % draw the lower part of boundary component
+    \pgfpatharc{\pgf@tqft@upper180}{0}{\pgf@tqft@bdry@width and \pgf@tqft@bdry@depth}
+
+
+      \iftikz@mode@draw
+      \pgfusepath{stroke}
+      \else
+      \pgfusepath{discard}
+      \fi
+    }
+  }
+}
+
+
+\endinput
