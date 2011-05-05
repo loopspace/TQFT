@@ -149,6 +149,19 @@ and the derived files           tqft.ins,
 %
 % \maketitle
 %
+%
+% \begin{tikzpicture}
+% \node[
+%   cobordism,
+%   fill=orange,
+%   fill opacity=.5,
+%   tqft boundary style={fill=purple},
+%   tqft boundary lower style={draw,dashed,thick,blue},
+%   tqft boundary upper style={draw,green,thick},
+% ] {};
+% \fill (0,0) circle[radius=2pt];
+% \end{tikzpicture}
+%
 % \section{Introduction}
 %
 % This package defines some TikZ/PGF node shapes that can be used to construct the diagrams common in Topological Quantum Field Theory (TQFT).
@@ -157,7 +170,7 @@ and the derived files           tqft.ins,
 % \begin{example}
 % \begin{tikzpicture}
 % \node[draw,pair of pants] (a) {};
-% \node[reverse pair of pants, anchor=incoming boundary 1] at (a.outgoing boundary 2) (b) {};
+% \node[draw,reverse pair of pants, anchor=incoming boundary 1] at (a.outgoing boundary 2) (b) {};
 % \end{tikzpicture}
 % \end{example}
 %
@@ -180,6 +193,7 @@ and the derived files           tqft.ins,
 % \end{tikzpicture}
 %
 % This has the following (additional) anchors:
+%
 % \begin{itemize}
 % \item \Verb+incoming boundary+
 % \item \Verb+outgoing boundary 1+
@@ -275,7 +289,7 @@ and the derived files           tqft.ins,
 % \end{tikzpicture}
 %
 % This has no additional anchors.
-% \end{itemize}
+% \end{enumerate}
 %
 % \section{Styling}
 %
@@ -2020,6 +2034,394 @@ and the derived files           tqft.ins,
 %    \end{macrocode}
 % \end{macro}
 %
+% Declare some dimension registers to hold the specifications of the cobordism.
+%    \begin{macrocode}
+\newdimen\tqft@xa
+\newdimen\tqft@xb
+\newdimen\tqft@c
+\newdimen\tqft@ch
+\newdimen\tqft@h
+\newdimen\tqft@s
+\newdimen\tqft@w
+\pgfkeys{/pgf/.cd,
+  tqft incoming boundary components/.initial=5,
+  tqft outgoing boundary components/.initial=4,
+  tqft offset/.initial=0
+}
+%    \end{macrocode}
+%
+% \begin{macro}{tqft shape}
+% This is a generic cobordism shape
+%    \begin{macrocode}
+\pgfdeclareshape{cobordism}{
+%    \end{macrocode}
+% Save our specifications: incoming and outgoing boundary components
+%    \begin{macrocode}
+  \savedmacro{\tqft@incoming}{\edef\tqft@incoming{\pgfkeysvalueof{/pgf/tqft incoming boundary components}}}
+  \savedmacro{\tqft@outgoing}{\edef\tqft@outgoing{\pgfkeysvalueof{/pgf/tqft outgoing boundary components}}}
+%    \end{macrocode}
+% and the offset (in units of boundary components) between the leading incoming and outgoing components (regarded as a shift of the outgoing components relative to the incoming)
+%    \begin{macrocode}
+  \savedmacro{\tqft@offset}{\edef\tqft@offset{\pgfkeysvalueof{/pgf/tqft offset}}}
+%    \end{macrocode}
+% Now we save our dimensions: height, separation, and the radii of the boundary circles
+%    \begin{macrocode}
+  \saveddimen{\tqft@height}{\pgf@x=\pgfkeysvalueof{/pgf/tqft cobordism height}}
+  \saveddimen{\tqft@separation}{\pgf@x=\pgfkeysvalueof{/pgf/tqft boundary separation}}
+  \saveddimen{\tqft@width}{\pgf@x=\pgfkeysvalueof{/pgf/tqft circle width}}
+  \saveddimen{\tqft@depth}{\pgf@x=\pgfkeysvalueof{/pgf/tqft circle depth}}
+%    \end{macrocode}
+% These are our externally available anchors
+%    \begin{macrocode}
+  \anchor{centre}{\pgfpointorigin}
+  \anchor{center}{\pgfpointorigin}
+%    \end{macrocode}
+% Now we define the background path.
+% This is the upper part of the cobordism.
+%    \begin{macrocode}
+  \backgroundpath{
+%    \end{macrocode}
+% Apply the internal transformation
+%    \begin{macrocode}
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+%    \end{macrocode}
+% Convert the boundary separation and width to lengths
+%    \begin{macrocode}
+    \pgfmathsetlength{\tqft@s}{\tqft@separation}
+    \pgfmathsetlength{\tqft@w}{2*\tqft@width}
+%    \end{macrocode}
+% Compute the starting position of the incoming boundary components so that we get the centre anchor on the centre of the cobordism
+%    \begin{macrocode}
+    \pgfmathsetlength{\tqft@xa}{-(max(\tqft@incoming - 1,\tqft@outgoing - 1 + \tqft@offset) + min(0,\tqft@offset))*\tqft@s/2 - \tqft@width}
+    \tqft@xb=\tqft@xa
+    \advance\tqft@xb by \tqft@w
+    \pgfmathsetlength{\tqft@c}{.5 * \tqft@height - 4 * \tqft@depth}
+    \pgfmathsetlength{\tqft@h}{.5 * \tqft@height}
+%    \end{macrocode}
+% Do we have any incoming boundary components at all?
+%    \begin{macrocode}
+    \ifnum\tqft@incoming>0
+%    \end{macrocode}
+% Yes, so move to the position of the first and draw it
+%    \begin{macrocode}
+    \pgfpathmoveto{\pgfqpoint{\tqft@xa}{\tqft@h}}
+     \pgfpatharc{\pgf@tqft@upper180}{0}{\tqft@width and \tqft@depth}
+%    \end{macrocode}
+% Do we have any more incoming boundary components?
+%    \begin{macrocode}
+   \ifnum\tqft@incoming>1
+%    \end{macrocode}
+% Yes, so iterate over the remaining incoming boundary components
+%    \begin{macrocode}
+    \foreach \tqft@k in {2,...,\tqft@incoming} {
+     \advance\tqft@xa by \tqft@k\tqft@s
+     \advance\tqft@xb by \tqft@k\tqft@s
+     \advance\tqft@xb by -2\tqft@s
+     \advance\tqft@xa by -\tqft@s
+     \pgfpathcurveto{\pgfqpoint{\tqft@xb}{\tqft@c}}{\pgfqpoint{\tqft@xa}{\tqft@c}}{\pgfqpoint{\tqft@xa}{\tqft@h}}
+     \pgfpatharc{\pgf@tqft@upper180}{0}{\tqft@width and \tqft@depth}
+    }
+    \fi
+%    \end{macrocode}
+% If we don't have any outgoing boundary components, may as well close up now.
+%    \begin{macrocode}
+    \ifnum\tqft@outgoing=0
+     \advance\tqft@xb by \tqft@incoming\tqft@s
+     \advance\tqft@xb by -\tqft@s
+     \pgfmathsetlength{\tqft@ch}{\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1)}
+     \pgfpathcurveto{\pgfqpoint{\tqft@xb}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@h}}
+    \fi
+    \fi
+%    \end{macrocode}
+% Shift down to the outgoing components, if we have any
+%    \begin{macrocode}
+    \ifnum\tqft@outgoing>0
+     \advance\tqft@xb by \tqft@incoming\tqft@s
+     \advance\tqft@xb by -\tqft@s
+     \pgfmathsetlength{\tqft@xa}{\tqft@xa + (\tqft@outgoing - 1 + \tqft@offset) * \tqft@separation + 2*\tqft@width}
+%    \end{macrocode}
+% If we had incoming boundaries, this is a curveto, otherwise it's a moveto
+%    \begin{macrocode}
+    \ifnum\tqft@incoming>0
+     \pgfmathsetlength{\tqft@ch}{\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1)}
+     \pgfpathcurveto{\pgfqpoint{\tqft@xb}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@h}}
+    \else
+     \pgfpathmoveto{\pgfqpoint{\tqft@xa}{-\tqft@h}}
+    \fi
+     \tqft@xb=\tqft@xa
+     \advance\tqft@xb by -\tqft@w
+%    \end{macrocode}
+% Now draw the lower components
+%    \begin{macrocode}
+     \pgfpatharc{0}{\pgf@tqft@upper180}{\tqft@width and \tqft@depth}
+%    \end{macrocode}
+% Now iterate over the remaining outgoing boundary components
+%    \begin{macrocode}
+    \ifnum\tqft@outgoing>1
+    \foreach \tqft@k in {2,...,\tqft@outgoing} {
+     \advance\tqft@xa by -\tqft@k\tqft@s
+     \advance\tqft@xb by -\tqft@k\tqft@s
+     \advance\tqft@xb by 2\tqft@s
+     \advance\tqft@xa by \tqft@s
+     \pgfpathcurveto{\pgfqpoint{\tqft@xb}{-\tqft@c}}{\pgfqpoint{\tqft@xa}{-\tqft@c}}{\pgfqpoint{\tqft@xa}{-\tqft@h}}
+     \pgfpatharc{0}{\pgf@tqft@upper180}{\tqft@width and \tqft@depth}
+    }
+    \fi
+%    \end{macrocode}
+% Shift back up to the incoming components, if we had any, otherwise arc back to our starting point
+%    \begin{macrocode}
+     \advance\tqft@xb by -\tqft@outgoing\tqft@s
+     \advance\tqft@xb by \tqft@s
+     \pgfmathsetlength{\tqft@ch}{\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1)}
+    \ifnum\tqft@incoming>0
+     \pgfmathsetlength{\tqft@xa}{\tqft@xa - (\tqft@outgoing -1 + \tqft@offset) * \tqft@separation - 2*\tqft@width}
+     \pgfpathcurveto{\pgfqpoint{\tqft@xb}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@h}}
+    \else
+     \pgfpathcurveto{\pgfqpoint{\tqft@xb}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@h}}
+    \fi
+    \fi
+%    \end{macrocode}
+% Close the path
+%    \begin{macrocode}
+     \pgfpathclose
+  }
+%    \end{macrocode}
+% End of background path
+% Now we define the behind background path.
+% This is the lower part of the boundary circles.
+%    \begin{macrocode}
+  \behindbackgroundpath{
+%    \end{macrocode}
+% Apply the internal transformation
+%    \begin{macrocode}
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+%    \end{macrocode}
+% Convert the boundary separation and width to lengths
+%    \begin{macrocode}
+    \pgfmathsetlength{\tqft@s}{\tqft@separation}
+    \pgfmathsetlength{\tqft@w}{2*\tqft@width}
+%    \end{macrocode}
+% Compute the starting position of the incoming boundary components so that we get the centre anchor on the centre of the cobordism
+%    \begin{macrocode}
+    \pgfmathsetlength{\tqft@xa}{-(max(\tqft@incoming - 1,\tqft@outgoing - 1 + \tqft@offset) + min(0,\tqft@offset) + 2)*\tqft@separation/2}
+    \pgfmathsetlength{\tqft@h}{.5 * \tqft@height}
+%    \end{macrocode}
+% This section draws the boundary circles
+%    \begin{macrocode}
+    {
+%    \end{macrocode}
+% Initialise the TikZ path settings and read in the style options for the boundary
+%    \begin{macrocode}
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary style contents}
+      \tikz@mode
+      \tikz@options
+%    \end{macrocode}
+% Do we have any incoming boundary components at all?
+%    \begin{macrocode}
+    \ifnum\tqft@incoming>0
+%    \end{macrocode}
+% Yes, so iterate over them
+%    \begin{macrocode}
+    \foreach \tqft@k in {1,...,\tqft@incoming} {
+     \advance\tqft@xa by \tqft@k\tqft@s
+     \pgfpathellipse{\pgfqpoint{\tqft@xa}{\tqft@h}}{\pgfqpoint{\tqft@width}{0pt}}{\pgfqpoint{0pt}{\tqft@depth}}
+    }
+    \fi
+%    \end{macrocode}
+% Now iterate over the outgoing boundary components, if we have any
+%    \begin{macrocode}
+    \ifnum\tqft@outgoing>0
+     \pgfmathsetlength{\tqft@xa}{\tqft@xa + (\tqft@outgoing + \tqft@offset + 1) * \tqft@separation}
+    \foreach \tqft@k in {1,...,\tqft@outgoing} {
+     \advance\tqft@xa by -\tqft@k\tqft@s
+%     \advance\tqft@xa by \tqft@s
+     \pgfpathellipse{\pgfqpoint{\tqft@xa}{-\tqft@h}}{\pgfqpoint{\tqft@width}{0pt}}{\pgfqpoint{0pt}{\tqft@depth}}
+    }
+    \fi
+%    \end{macrocode}
+%    \begin{macrocode}
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@fill fill,\fi%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+    }
+%    \end{macrocode}
+% This section draws the lower parts of the boundary circles
+%    \begin{macrocode}
+    {
+%    \end{macrocode}
+% Initialise the TikZ path settings and read in the style options for the boundary
+%    \begin{macrocode}
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary lower style contents}
+      \tikz@mode
+      \tikz@options
+      \advance\tqft@xa by .5\tqft@w
+%    \end{macrocode}
+% Do we have any incoming boundary components at all?
+%    \begin{macrocode}
+    \ifnum\tqft@incoming>0
+%    \end{macrocode}
+% Yes, so iterate over them
+%    \begin{macrocode}
+    \foreach \tqft@k in {1,...,\tqft@incoming} {
+     \advance\tqft@xa by \tqft@k\tqft@s
+     \pgfpathmoveto{\pgfqpoint{\tqft@xa}{\tqft@h}}
+     \pgfpatharc{0}{\pgf@tqft@lower180}{\tqft@width and \tqft@depth}
+    }
+    \fi
+%    \end{macrocode}
+% Now iterate over the outgoing boundary components, if we have any
+%    \begin{macrocode}
+    \ifnum\tqft@outgoing>0
+     \pgfmathsetlength{\tqft@xa}{\tqft@xa + (\tqft@outgoing + \tqft@offset + 1) * \tqft@separation}
+    \foreach \tqft@k in {1,...,\tqft@outgoing} {
+     \advance\tqft@xa by -\tqft@k\tqft@s
+%     \advance\tqft@xa by \tqft@s
+     \pgfpathmoveto{\pgfqpoint{\tqft@xa}{-\tqft@h}}
+     \pgfpatharc{0}{\pgf@tqft@lower180}{\tqft@width and \tqft@depth}
+    }
+    \fi
+%    \end{macrocode}
+%    \begin{macrocode}
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@fill fill,\fi%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+    }
+  }
+%    \end{macrocode}
+% End of behind background path
+% Now we define the before background path.
+% This is the lower part of the boundary circles.
+%    \begin{macrocode}
+  \beforebackgroundpath{
+%    \end{macrocode}
+% Apply the internal transformation
+%    \begin{macrocode}
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+%    \end{macrocode}
+% Convert the boundary separation and width to lengths
+%    \begin{macrocode}
+    \pgfmathsetlength{\tqft@s}{\tqft@separation}
+    \pgfmathsetlength{\tqft@w}{2*\tqft@width}
+%    \end{macrocode}
+% Compute the starting position of the incoming boundary components so that we get the centre anchor on the centre of the cobordism
+%    \begin{macrocode}
+    \pgfmathsetlength{\tqft@xa}{-(max(\tqft@incoming - 1,\tqft@outgoing - 1 + \tqft@offset) + min(0,\tqft@offset) + 2)*\tqft@separation/2}
+    \pgfmathsetlength{\tqft@h}{.5 * \tqft@height}
+%    \end{macrocode}
+% This section draws the boundary circles
+%    \begin{macrocode}
+    {
+%    \end{macrocode}
+% Initialise the TikZ path settings and read in the style options for the boundary
+%    \begin{macrocode}
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary style contents}
+      \tikz@mode
+      \tikz@options
+%    \end{macrocode}
+% Do we have any incoming boundary components at all?
+%    \begin{macrocode}
+    \ifnum\tqft@incoming>0
+%    \end{macrocode}
+% Yes, so iterate over them
+%    \begin{macrocode}
+    \foreach \tqft@k in {1,...,\tqft@incoming} {
+     \advance\tqft@xa by \tqft@k\tqft@s
+     \pgfpathellipse{\pgfqpoint{\tqft@xa}{\tqft@h}}{\pgfqpoint{\tqft@width}{0pt}}{\pgfqpoint{0pt}{\tqft@depth}}
+    }
+    \fi
+%    \end{macrocode}
+% Now iterate over the outgoing boundary components, if we have any
+%    \begin{macrocode}
+    \ifnum\tqft@outgoing>0
+     \pgfmathsetlength{\tqft@xa}{\tqft@xa + (\tqft@outgoing + \tqft@offset + 1) * \tqft@separation}
+    \foreach \tqft@k in {1,...,\tqft@outgoing} {
+     \advance\tqft@xa by -\tqft@k\tqft@s
+%     \advance\tqft@xa by \tqft@s
+     \pgfpathellipse{\pgfqpoint{\tqft@xa}{-\tqft@h}}{\pgfqpoint{\tqft@width}{0pt}}{\pgfqpoint{0pt}{\tqft@depth}}
+    }
+    \fi
+%    \end{macrocode}
+%    \begin{macrocode}
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@fill fill,\fi%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+    }
+%    \end{macrocode}
+% This section draws the upper parts of the boundary circles
+%    \begin{macrocode}
+    {
+%    \end{macrocode}
+% Initialise the TikZ path settings and read in the style options for the boundary
+%    \begin{macrocode}
+      \tikz@mode@fillfalse%
+      \tikz@mode@drawfalse%
+      \let\tikz@mode=\pgfutil@empty
+      \let\tikz@options=\pgfutil@empty
+      \tikzset{tqft boundary upper style contents}
+      \tikz@mode
+      \tikz@options
+      \advance\tqft@xa by .5\tqft@w
+%    \end{macrocode}
+% Do we have any incoming boundary components at all?
+%    \begin{macrocode}
+    \ifnum\tqft@incoming>0
+%    \end{macrocode}
+% Yes, so iterate over them
+%    \begin{macrocode}
+    \foreach \tqft@k in {1,...,\tqft@incoming} {
+     \advance\tqft@xa by \tqft@k\tqft@s
+     \pgfpathmoveto{\pgfqpoint{\tqft@xa}{\tqft@h}}
+     \pgfpatharc{0}{\pgf@tqft@upper180}{\tqft@width and \tqft@depth}
+    }
+    \fi
+%    \end{macrocode}
+% Now iterate over the outgoing boundary components, if we have any
+%    \begin{macrocode}
+    \ifnum\tqft@outgoing>0
+     \pgfmathsetlength{\tqft@xa}{\tqft@xa + (\tqft@outgoing + \tqft@offset + 1) * \tqft@separation}
+    \foreach \tqft@k in {1,...,\tqft@outgoing} {
+     \advance\tqft@xa by -\tqft@k\tqft@s
+%     \advance\tqft@xa by \tqft@s
+     \pgfpathmoveto{\pgfqpoint{\tqft@xa}{-\tqft@h}}
+     \pgfpatharc{0}{\pgf@tqft@upper180}{\tqft@width and \tqft@depth}
+    }
+    \fi
+%    \end{macrocode}
+%    \begin{macrocode}
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@fill fill,\fi%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+    }
+%    \end{macrocode}
+%    \begin{macrocode}
+  }
+}
+%    \end{macrocode}
+% End of background path
+%   \begin{macrocode}
+}
+%    \end{macrocode}
+% \end{macro}
 % \iffalse
 %</package>
 % \fi
