@@ -150,7 +150,7 @@ and the derived files           tqft.ins,
 % \maketitle
 %
 %
-% \begin{tikzpicture}
+% \begin{tikzpicture}[every node/.style={tqft cobordism style={draw,thick,red}}]
 % \node[
 %   cobordism,
 %   fill=orange,
@@ -162,8 +162,59 @@ and the derived files           tqft.ins,
 %   tqft incoming boundary components=4,
 %   tqft outgoing boundary components=6,
 %   tqft offset=-1.5,
-% ] {};
+% ] (a) {};
 % \fill (0,0) circle[radius=2pt];
+% \fill (a.incoming boundary 1) circle[radius=2pt];
+% \fill (a.incoming boundary 3) circle[radius=2pt];
+% \fill (a.outgoing boundary 1) circle[radius=2pt];
+% \fill (a.outgoing boundary 4) circle[radius=2pt];
+% \fill (a.outgoing boundary 2) circle[radius=2pt];
+% \node[
+%   draw,
+%   cobordism,
+%   tqft incoming boundary components=1,
+%   tqft outgoing boundary components=2,
+%   tqft offset=-.5,
+% ] at (-3,-3) {};
+% \node[
+%   draw,
+%   cobordism,
+%   tqft incoming boundary components=2,
+%   tqft outgoing boundary components=1,
+%   tqft offset=.5,
+% ] at (-1,-3) {};
+% \node[
+%   draw,
+%   cobordism,
+%   tqft incoming boundary components=1,
+%   tqft outgoing boundary components=1,
+%   tqft offset=-.5,
+% ] at (1,-3) {};
+% \node[
+%   draw,
+%   cobordism,
+%   tqft incoming boundary components=1,
+%   tqft outgoing boundary components=1,
+%   tqft offset=.5,
+% ] at (3,-3) {};
+% \node[
+%   draw,
+%   cobordism,
+%   tqft incoming boundary components=1,
+%   tqft outgoing boundary components=1,
+% ] at (4.5,-3) {};
+% \node[
+%   draw,
+%   cobordism,
+%   tqft incoming boundary components=1,
+%   tqft outgoing boundary components=0,
+% ] at (5.5,-3) {};
+% \node[
+%   draw,
+%   cobordism,
+%   tqft incoming boundary components=0,
+%   tqft outgoing boundary components=1,
+% ] at (6.5,-3) {};
 % \end{tikzpicture}
 %
 % \section{Introduction}
@@ -2075,10 +2126,153 @@ and the derived files           tqft.ins,
   \saveddimen{\tqft@width}{\pgf@x=\pgfkeysvalueof{/pgf/tqft circle width}}
   \saveddimen{\tqft@depth}{\pgf@x=\pgfkeysvalueof{/pgf/tqft circle depth}}
 %    \end{macrocode}
+%
+% For the externally available anchors, we need to save a few things with the flow transformation in place.
+%    \begin{macrocode}
+   \savedanchor{\tqft@start@incoming}{%
+%    \end{macrocode}
+% Apply the transformation
+%    \begin{macrocode}
+    \pgf@relevantforpicturesizefalse
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+%    \end{macrocode}
+% Find our current origin under the transformation and save it
+%    \begin{macrocode}
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+%    \end{macrocode}
+% position of incoming boundary in internal coordinates 
+%    \begin{macrocode}
+    \pgfmathsetlength{\tqft@xa}{-(max(\pgfkeysvalueof{/pgf/tqft incoming boundary components} - 1,\pgfkeysvalueof{/pgf/tqft outgoing boundary components} - 1 + \pgfkeysvalueof{/pgf/tqft offset}) + min(0,\pgfkeysvalueof{/pgf/tqft offset}) + 2 )*\pgfkeysvalueof{/pgf/tqft boundary separation}/2}
+    \pgfmathsetlength{\tqft@h}{.5 * \pgfkeysvalueof{/pgf/tqft cobordism height}}
+    \pgfmoveto{\pgfpoint{\tqft@xa}{\tqft@h}}
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+%    \end{macrocode}
+% absolute position
+%    \begin{macrocode}
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+%    \end{macrocode}
+% now relative to internal origin
+%    \begin{macrocode}
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+}
+%    \end{macrocode}
+%    \begin{macrocode}
+   \savedanchor{\tqft@start@outgoing}{%
+%    \end{macrocode}
+% Apply the transformation
+%    \begin{macrocode}
+    \pgf@relevantforpicturesizefalse
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+%    \end{macrocode}
+% Find our current origin under the transformation and save it
+%    \begin{macrocode}
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+%    \end{macrocode}
+% position of incoming boundary in internal coordinates 
+%    \begin{macrocode}
+    \pgfmathsetlength{\tqft@xa}{-(max(\pgfkeysvalueof{/pgf/tqft incoming boundary components} - 1,\pgfkeysvalueof{/pgf/tqft outgoing boundary components} - 1 + \pgfkeysvalueof{/pgf/tqft offset}) + min(0,\pgfkeysvalueof{/pgf/tqft offset}) + 2 - 2*\pgfkeysvalueof{/pgf/tqft offset})*\pgfkeysvalueof{/pgf/tqft boundary separation}/2}
+    \pgfmathsetlength{\tqft@h}{-.5 * \pgfkeysvalueof{/pgf/tqft cobordism height}}
+    \pgfmoveto{\pgfpoint{\tqft@xa}{\tqft@h}}
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+%    \end{macrocode}
+% absolute position
+%    \begin{macrocode}
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+%    \end{macrocode}
+% now relative to internal origin
+%    \begin{macrocode}
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+}
+%    \end{macrocode}
+%    \begin{macrocode}
+   \savedanchor{\tqft@direction}{%
+%    \end{macrocode}
+% Apply the transformation
+%    \begin{macrocode}
+    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft flow}\endcsname
+%    \end{macrocode}
+% Find our current origin under the transformation and save it
+%    \begin{macrocode}
+    \pgfpointorigin
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
+%    \end{macrocode}
+% orientation of cobordism
+%    \begin{macrocode}
+    \pgfmathsetlength{\tqft@xa}{\pgfkeysvalueof{/pgf/tqft boundary separation}}
+    \pgfmathsetlength{\tqft@h}{\pgfkeysvalueof{/pgf/tqft cobordism height}}
+    \pgfmoveto{\pgfpoint{\tqft@xa}{\tqft@h}}
+    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
+%    \end{macrocode}
+% absolute position
+%    \begin{macrocode}
+    \setlength{\pgf@x}{\pgf@tqft@x}
+    \setlength{\pgf@y}{\pgf@tqft@y}
+    \setlength{\pgf@xa}{\pgf@tqft@ox}
+    \setlength{\pgf@ya}{\pgf@tqft@oy}
+%    \end{macrocode}
+% now relative to internal origin
+%    \begin{macrocode}
+    \advance\pgf@x by -\pgf@xa
+    \advance\pgf@y by -\pgf@ya
+}
+%    \end{macrocode}
 % These are our externally available anchors
 %    \begin{macrocode}
   \anchor{centre}{\pgfpointorigin}
   \anchor{center}{\pgfpointorigin}
+{
+  \foreach \tqft@k in {1,...,\pgfkeysvalueof{/pgf/tqft incoming boundary components}} {
+    \edef\tqft@anchor{\noexpand\anchor{incoming boundary \tqft@k}{
+    \noexpand\tqft@start@incoming
+    \noexpand\pgf@xa=\noexpand\pgf@x
+    \noexpand\pgf@ya=\noexpand\pgf@y
+    \noexpand\tqft@direction
+    \noexpand\pgf@xb=\noexpand\pgf@x
+    \noexpand\pgf@yb=\noexpand\pgf@y
+    \noexpand\advance\noexpand\pgf@xa by \tqft@k\noexpand\pgf@xb
+    \noexpand\pgf@x=\noexpand\pgf@xa
+    \noexpand\pgf@y=\noexpand\pgf@ya
+    }}
+
+    \tqft@anchor
+}
+  }
+{
+  \foreach \tqft@k in {1,...,\pgfkeysvalueof{/pgf/tqft outgoing boundary components}} {
+    \edef\tqft@anchor{\noexpand\anchor{outgoing boundary \tqft@k}{
+    \noexpand\tqft@start@outgoing
+    \noexpand\pgf@xa=\noexpand\pgf@x
+    \noexpand\pgf@ya=\noexpand\pgf@y
+    \noexpand\tqft@direction
+    \noexpand\pgf@xb=\noexpand\pgf@x
+    \noexpand\pgf@yb=\noexpand\pgf@y
+    \noexpand\advance\noexpand\pgf@xa by \tqft@k\noexpand\pgf@xb
+    \noexpand\pgf@x=\noexpand\pgf@xa
+    \noexpand\pgf@y=\noexpand\pgf@ya
+    }}
+
+    \tqft@anchor
+}
+  }
 %    \end{macrocode}
 % Now we define the background path.
 % This is the upper part of the cobordism.
@@ -2176,11 +2370,12 @@ and the derived files           tqft.ins,
 %    \begin{macrocode}
      \advance\tqft@xb by -\tqft@outgoing\tqft@s
      \advance\tqft@xb by \tqft@s
-     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
     \ifnum\tqft@incoming>0
      \pgfmathsetlength{\tqft@xa}{\tqft@xa - (\tqft@outgoing -1 + \tqft@offset) * \tqft@separation - 2*\tqft@width}
+     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@h}}
     \else
+     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@h}}
     \fi
     \fi
@@ -2364,6 +2559,7 @@ and the derived files           tqft.ins,
      \advance\tqft@xb by \tqft@incoming\tqft@s
      \advance\tqft@xb by -\tqft@s
      \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
+    \pgfpathmoveto{\pgfqpoint{\tqft@xb}{\tqft@h}}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@h}}
     \fi
     \fi
@@ -2409,11 +2605,12 @@ and the derived files           tqft.ins,
 %    \begin{macrocode}
      \advance\tqft@xb by -\tqft@outgoing\tqft@s
      \advance\tqft@xb by \tqft@s
-     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
     \ifnum\tqft@incoming>0
      \pgfmathsetlength{\tqft@xa}{\tqft@xa - (\tqft@outgoing -1 + \tqft@offset) * \tqft@separation - 2*\tqft@width}
+     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@h}}
     \else
+     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@h}}
     \fi
     \fi
