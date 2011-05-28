@@ -1112,7 +1112,11 @@ and the derived files           tqft.ins,
      \pgfpatharc{0}{\pgf@tqft@upper180}{\tqft@width and \tqft@depth}
   \ifx\tikz@fig@name\pgfutil@empty
   \else
-  \pgfnode{tqft boundary circle}{centre}{}{\tikz@fig@name\space incoming-\tqft@k}{}
+  {
+    \advance\tqft@xa by -\tqft@width
+    \pgftransformshift{\pgfqpoint{\tqft@xa}{\tqft@h}}
+    \pgfnode{tqft boundary circle}{centre}{}{\tikz@fig@name\space incoming \tqft@k}{}
+  }
   \fi
     }
     \fi
@@ -1128,7 +1132,12 @@ and the derived files           tqft.ins,
      \pgfpatharc{0}{\pgf@tqft@upper180}{\tqft@width and \tqft@depth}
   \ifx\tikz@fig@name\pgfutil@empty
   \else
-  \pgfnode{tqft boundary circle}{centre}{}{\tikz@fig@name\space outgoing-\tqft@k}{}
+  {
+    \pgfmathtruncatemacro{\tqft@l}{\tqft@outgoing + 1 - \tqft@k}
+    \advance\tqft@xa by -\tqft@width
+    \pgftransformshift{\pgfqpoint{\tqft@xa}{-\tqft@h}}
+%    \pgfnode{tqft boundary circle}{centre}{}{\tikz@fig@name\space outgoing \tqft@l}{draw}
+  }
   \fi
     }
     \fi
@@ -1147,6 +1156,8 @@ and the derived files           tqft.ins,
 %
 % \begin{macro}{boundary circle shape}
 % This is a the shape of the boundary circles
+% FIXME: use \pgfpointtransformed lots here
+% Could also use \pgftransformreset inside a group to avoid having to measure before and after applying the local transformation
 %    \begin{macrocode}
 \pgfdeclareshape{tqft boundary circle}{
 %    \end{macrocode}
@@ -1168,13 +1179,8 @@ and the derived files           tqft.ins,
 %    \end{macrocode}
 % Find our current origin under the transformation and save it
 %    \begin{macrocode}
-    \pgfpointorigin
-    \pgf@xa=\pgf@x
-    \pgf@ya=\pgf@y
-    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
-    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
-    \setlength{\pgf@x}{\pgf@tqft@ox}
-    \setlength{\pgf@y}{\pgf@tqft@oy}
+  \pgfpointorigin
+  \pgf@process{\pgfpoint{\the\pgf@x}{\the\pgf@y}}
 }
 %    \end{macrocode}
 %    \begin{macrocode}
@@ -1299,7 +1305,7 @@ and the derived files           tqft.ins,
 %    \end{macrocode}
 % Draw the boundary circle
 %    \begin{macrocode}
-    \pgfpathellipse{\pgfpointorigin}{\pgfqpoint{\tqft@width}{0pt}}{\pgfqpoint{0pt}{\tqft@depth}}
+  \pgfpathellipse{\pgfqpoint{0pt}{0pt}}{\pgfqpoint{\tqft@width}{0pt}}{\pgfqpoint{0pt}{\tqft@depth}}
   } 
 %    \end{macrocode}
 % We draw the upper and lower arcs again with the appropriate styles
