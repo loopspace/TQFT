@@ -1,3 +1,4 @@
+\immediate\write18{tex tqft.dtx}
 \documentclass{article}
 \usepackage{tikz}
 \usepackage{tqft}
@@ -14,8 +15,8 @@
     \pgf@y=-\my@y\relax
     \advance\pgf@x by \my@xa\relax
     \advance\pgf@y by \my@ya\relax
-    \showthe\pgf@x
-    \showthe\pgf@y
+%    \showthe\pgf@x
+%    \showthe\pgf@y
   }
   \anchor{center}{\centerpoint}
 \backgroundpath{
@@ -35,7 +36,7 @@
 \node[test shape,draw] (b) at (3,0) {};
 \fill[red] (a) circle[radius=2pt];
 \end{tikzpicture}
-\end{document}
+
 \begin{tikzpicture}[every node/.style={tqft/cobordism style={draw,thick,red}}]
  \node[
    tqft,
@@ -49,12 +50,12 @@
    tqft/outgoing boundary components=6,
    tqft/offset=-1.5,
  ] (a) {};
-% \fill (a incoming 2.90) circle[radius=2pt];
-% \fill (a outgoing 5.270) circle[radius=2pt];
-% \fill (a incoming 2.centre) circle[radius=2pt];
-% \fill (a outgoing 5.centre) circle[radius=2pt];
-% \fill (a incoming 2.above) circle[radius=2pt];
-% \fill (a outgoing 5.below) circle[radius=2pt];
+ \fill (a incoming 2.90) circle[radius=2pt];
+ \fill (a outgoing 5.270) circle[radius=2pt];
+ \fill (a incoming 2.centre) circle[radius=2pt];
+ \fill (a outgoing 5.centre) circle[radius=2pt];
+ \fill (a incoming 4.above) circle[radius=2pt];
+ \fill (a outgoing 3.below) circle[radius=2pt];
  \node[pin=north:1] at (a.incoming boundary 1) {};
  \node[pin=north:3] at (a.incoming boundary 3) {};
  \node[pin=south:1] at (a.outgoing boundary 1) {};
@@ -106,7 +107,7 @@
    tqft/incoming boundary components=4,
    tqft/outgoing boundary components=6,
    tqft/offset=-1.5,
- ] at (3,0) (b) {};
+ ] at (5,0) (b) {};
 \fill[red] (b.centre) circle[radius=2pt];
  \fill[red] (b.next) circle[radius=2pt] node[pin=north:next] {};
  \fill[red] (b.prior) circle[radius=2pt] node[pin=north:prior] {};
@@ -121,8 +122,8 @@
  \draw (0,0) -- (180:2);
  \draw (0,0) -- (270:2);
 \foreach \ang in {0,20,...,340} {
- \fill (a.\ang) circle[radius=2pt] node[pin=270-\ang:\ang] {};
- \draw (0,0) -- (\ang:2);
+ \fill (a.\ang) circle[radius=2pt] node[pin=\ang:\ang] {};
+ \draw (0,0) -- (270-\ang:2);
 }
  \end{tikzpicture}
 

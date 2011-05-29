@@ -471,6 +471,7 @@ and the derived files           tqft.ins,
 \newdimen\tqft@h
 \newdimen\tqft@s
 \newdimen\tqft@w
+\newif\iftqft@within@node
 %    \end{macrocode}
 % Now we set up all the keys that we'll need in the course of this shape
 %    \begin{macrocode}
@@ -485,7 +486,20 @@ and the derived files           tqft.ins,
   boundary separation/.initial=2cm,
   circle width/.initial=10pt,
   circle depth/.initial=5pt,
-  flow/.initial=south,
+  flow/.code={%
+    \pgfkeys{/pgf/tqft/flow transformation/.expand twice/.expand once=\pgfkeysvalueof{/pgf/tqft/flow transformation #1}}
+  },
+  flow transformation south/.initial={},
+  flow transformation north/.initial={%
+    \noexpand\pgftransformxscale{-1}\noexpand\pgftransformrotate{180}%
+  },
+  flow transformation east/.initial={%
+    \noexpand\pgftransformyscale{-1}\noexpand\pgftransformrotate{90}%
+  },
+  flow transformation west/.initial={%
+    \noexpand\pgftransformrotate{270}%
+  },
+  flow transformation/.initial={},
   view from/.is choice,
   view from/incoming/.code={%
     \let\pgf@tqft@upper\pgf@tqft@minus
@@ -594,7 +608,7 @@ and the derived files           tqft.ins,
 % Apply the transformation
 %    \begin{macrocode}
     \pgf@relevantforpicturesizefalse
-    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft/flow}\endcsname
+%  \pgfkeysvalueof{/pgf/tqft/flow transformation}
 %    \end{macrocode}
 % Find our current origin under the transformation and save it
 %    \begin{macrocode}
@@ -630,7 +644,7 @@ and the derived files           tqft.ins,
 % Apply the transformation
 %    \begin{macrocode}
     \pgf@relevantforpicturesizefalse
-    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft/flow}\endcsname
+%  \pgfkeysvalueof{/pgf/tqft/flow transformation}
 %    \end{macrocode}
 % Find our current origin under the transformation and save it
 %    \begin{macrocode}
@@ -665,7 +679,7 @@ and the derived files           tqft.ins,
 %    \end{macrocode}
 % Apply the transformation
 %    \begin{macrocode}
-    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft/flow}\endcsname
+%  \pgfkeysvalueof{/pgf/tqft/flow transformation}
 %    \end{macrocode}
 % Find our current origin under the transformation and save it
 %    \begin{macrocode}
@@ -744,7 +758,7 @@ and the derived files           tqft.ins,
 %    \end{macrocode}
 % Apply the internal transformation
 %    \begin{macrocode}
-    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft/flow}\endcsname
+%  \pgfkeysvalueof{/pgf/tqft/flow transformation}
 %    \end{macrocode}
 % Convert the boundary separation and width to lengths
 %    \begin{macrocode}
@@ -856,7 +870,7 @@ and the derived files           tqft.ins,
 %    \end{macrocode}
 % Apply the internal transformation
 %    \begin{macrocode}
-    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft/flow}\endcsname
+%  \pgfkeysvalueof{/pgf/tqft/flow transformation}
 %    \end{macrocode}
 % Convert the boundary separation and width to lengths
 %    \begin{macrocode}
@@ -1090,6 +1104,9 @@ and the derived files           tqft.ins,
 %    \end{macrocode}
 % Initialise the TikZ path settings and read in the style options for the boundary
 %    \begin{macrocode}
+\let\tqft@bdry@path=\pgfutil@empty
+\let\tqft@bdry@node@path=\pgfutil@empty
+\pgfsyssoftpath@setcurrentpath{\tqft@bdry@path}
       \tikz@mode@fillfalse%
       \tikz@mode@drawfalse%
       \let\tikz@mode=\pgfutil@empty
@@ -1115,7 +1132,12 @@ and the derived files           tqft.ins,
   {
     \advance\tqft@xa by -\tqft@width
     \pgftransformshift{\pgfqpoint{\tqft@xa}{\tqft@h}}
+    \tqft@within@nodetrue
+    \pgfsyssoftpath@getcurrentpath{\tqft@bdry@path}
+    \pgfsyssoftpath@setcurrentpath{\tqft@bdry@node@path}
     \pgfnode{tqft boundary circle}{centre}{}{\tikz@fig@name\space incoming \tqft@k}{}
+    \pgfsyssoftpath@getcurrentpath{\tqft@bdry@node@path}
+    \pgfsyssoftpath@setcurrentpath{\tqft@bdry@path}
   }
   \fi
     }
@@ -1136,7 +1158,11 @@ and the derived files           tqft.ins,
     \pgfmathtruncatemacro{\tqft@l}{\tqft@outgoing + 1 - \tqft@k}
     \advance\tqft@xa by -\tqft@width
     \pgftransformshift{\pgfqpoint{\tqft@xa}{-\tqft@h}}
-%    \pgfnode{tqft boundary circle}{centre}{}{\tikz@fig@name\space outgoing \tqft@l}{draw}
+    \pgfsyssoftpath@getcurrentpath{\tqft@bdry@path}
+    \pgfsyssoftpath@setcurrentpath{\tqft@bdry@node@path}
+    \pgfnode{tqft boundary circle}{centre}{}{\tikz@fig@name\space outgoing \tqft@l}{}
+    \pgfsyssoftpath@getcurrentpath{\tqft@bdry@node@path}
+    \pgfsyssoftpath@setcurrentpath{\tqft@bdry@path}
   }
   \fi
     }
@@ -1169,105 +1195,82 @@ and the derived files           tqft.ins,
   \saveddimen{\tqft@depth}{\pgf@x=\pgfkeysvalueof{/pgf/tqft/circle depth}}
 %    \end{macrocode}
 %
-% For the externally available anchors, we need to save a few things with the flow transformation in place.
+% For the externally available anchors, we need to save the declared transformation; we save the actual transformation, not the macro that points to it.
+%    \begin{macrocode}
+   \savedmacro{\tqft@transformation}{%
+  \pgfkeysgetvalue{/pgf/tqft/flow transformation}{\tqft@temp}
+  \let\tqft@transformation\tqft@temp
+}
+%    \end{macrocode}
 %    \begin{macrocode}
    \savedanchor{\tqft@centre}{%
-%    \end{macrocode}
-% Apply the transformation
-%    \begin{macrocode}
-    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft/flow}\endcsname
-%    \end{macrocode}
-% Find our current origin under the transformation and save it
-%    \begin{macrocode}
-  \pgfpointorigin
-  \pgf@process{\pgfpoint{\the\pgf@x}{\the\pgf@y}}
-}
-%    \end{macrocode}
-%    \begin{macrocode}
-   \savedanchor{\tqft@xaxis}{%
-%    \end{macrocode}
-% Apply the transformation
-%    \begin{macrocode}
-    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft/flow}\endcsname
-%    \end{macrocode}
-% Find our current origin under the transformation and save it
-%    \begin{macrocode}
-    \pgfpointorigin
-    \pgf@xa=\pgf@x
-    \pgf@ya=\pgf@y
-    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
-    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
-%    \end{macrocode}
-% orientation of cobordism, not sure what a "safe" value is to use here so using 20pt
-%    \begin{macrocode}
-    \pgfmoveto{\pgfpoint{20pt}{0pt}}
-    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
-%    \end{macrocode}
-% absolute position
-%    \begin{macrocode}
-    \setlength{\pgf@x}{\pgf@tqft@x}
-    \setlength{\pgf@y}{\pgf@tqft@y}
-%    \end{macrocode}
-% now relative to internal origin
-%    \begin{macrocode}
-    \advance\pgf@x by -\pgf@xa
-    \advance\pgf@y by -\pgf@ya
-}
-%    \end{macrocode}
-%    \begin{macrocode}
-   \savedanchor{\tqft@yaxis}{%
-%    \end{macrocode}
-% Apply the transformation
-%    \begin{macrocode}
-    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft/flow}\endcsname
-%    \end{macrocode}
-% Find our current origin under the transformation and save it
-%    \begin{macrocode}
-    \pgfpointorigin
-    \pgf@xa=\pgf@x
-    \pgf@ya=\pgf@y
-    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
-    \pgfgetlastxy{\pgf@tqft@ox}{\pgf@tqft@oy}
-%    \end{macrocode}
-% orientation of cobordism, not sure what a "safe" value is to use here so using 20pt
-%    \begin{macrocode}
-    \pgfmoveto{\pgfpoint{0pt}{20pt}}
-    \pgfgetlastxy{\pgf@tqft@x}{\pgf@tqft@y}
-%    \end{macrocode}
-% absolute position
-%    \begin{macrocode}
-    \setlength{\pgf@x}{\pgf@tqft@x}
-    \setlength{\pgf@y}{\pgf@tqft@y}
-%    \end{macrocode}
-% now relative to internal origin
-%    \begin{macrocode}
-    \advance\pgf@x by -\pgf@xa
-    \advance\pgf@y by -\pgf@ya
-}
+  \pgfpointorigin}
 %    \end{macrocode}
 % These are our externally available anchors
 %    \begin{macrocode}
   \anchor{centre}{\tqft@centre}
   \anchor{center}{\tqft@centre}
   \anchor{next}{%
-  \tqft@xaxis%
-  \pgfmathsetlength{\pgf@x}{\pgf@x * \tqft@separation/20}
-  \pgfmathsetlength{\pgf@y}{\pgf@y * \tqft@separation/20}
+  {%
+%    \end{macrocode}
+% Cancel any external transformations
+% (as the node caller will handle them)
+%    \begin{macrocode}
+    \pgftransformreset
+%    \end{macrocode}
+% Apply our internal transformation
+%    \begin{macrocode}
+    \tqft@transformation
+    \pgfpointtransformed{\pgfqpoint{\tqft@separation}{0pt}}
+  }%
 }
+%    \end{macrocode}
+%    \begin{macrocode}
   \anchor{prior}{%
-  \tqft@xaxis%
-  \pgfmathsetlength{\pgf@x}{-\pgf@x * \tqft@separation/20}
-  \pgfmathsetlength{\pgf@y}{-\pgf@y * \tqft@separation/20}
+  {%
+%    \end{macrocode}
+% Cancel any external transformations
+% (as the node caller will handle them)
+%    \begin{macrocode}
+    \pgftransformreset
+%    \end{macrocode}
+% Apply our internal transformation
+%    \begin{macrocode}
+    \tqft@transformation
+    \pgfpointtransformed{\pgfqpoint{-\tqft@separation}{0pt}}
+  }%
 }
+%    \end{macrocode}
+%    \begin{macrocode}
   \anchor{above}{%
-  \tqft@yaxis%
-  \pgfmathsetlength{\pgf@x}{\pgf@x * \tqft@height/20}
-  \pgfmathsetlength{\pgf@y}{\pgf@y * \tqft@height/20}
+  {%
+%    \end{macrocode}
+% Cancel any external transformations
+% (as the node caller will handle them)
+%    \begin{macrocode}
+    \pgftransformreset
+%    \end{macrocode}
+% Apply our internal transformation
+%    \begin{macrocode}
+    \tqft@transformation
+    \pgfpointtransformed{\pgfqpoint{0pt}{\tqft@height}}
+  }%
 }
+%    \end{macrocode}
+%    \begin{macrocode}
   \anchor{below}{%
-  \tqft@yaxis%
-  \pgfmathsetlength{\pgf@x}{-\pgf@x * \tqft@height/20}
-  \pgfmathsetlength{\pgf@y}{-\pgf@y * \tqft@height/20}
+  {%
+%    \end{macrocode}
+% Cancel any external transformations
+% (as the node caller will handle them)
+%    \begin{macrocode}
+    \pgftransformreset
+%    \end{macrocode}
+% Apply our internal transformation
+%    \begin{macrocode}
+    \tqft@transformation
+    \pgfpointtransformed{\pgfqpoint{0pt}{-\tqft@height}}
+  }%
 }
 %    \end{macrocode}
 % The anchor border is the ellipse, but we need to take into account the possible transformation.
@@ -1276,23 +1279,31 @@ and the derived files           tqft.ins,
 % Should provide a system whereby that can be intepreted in the main coordinate system.
 %    \begin{macrocode}
   \anchorborder{
-    \edef\pgf@marshal{%
-      \noexpand\pgfpointborderellipse
-      {\noexpand\pgfqpoint{\the\pgf@x}{\the\pgf@y}}
-      {\noexpand\pgfqpoint{\tqft@width}{\tqft@depth}}
-    }%
-  \pgf@marshal
-  \pgf@xc=\pgf@x
-  \pgf@yc=\pgf@y
-  \tqft@xaxis
-  \pgf@xa=\pgf@x
-  \pgf@ya=\pgf@y
-  \tqft@yaxis
+%    \end{macrocode}
+% This next \pgf@process makes the angles absolute.
+% Comment it out to make the angles relative.
+%    \begin{macrocode}
+  \pgf@process{
+    \pgf@xb=\pgf@x
+    \pgf@yb=\pgf@y
+    \pgftransformreset
+    \tqft@transformation
+    \pgfpointtransformed{\pgfqpoint{\the\pgf@xb}{\the\pgf@yb}}
+  }
+  \edef\tqft@marshal{%
+    \noexpand\pgfpointborderellipse
+    {\noexpand\pgfqpoint{\the\pgf@x}{\the\pgf@y}}
+    {\noexpand\pgfqpoint{\tqft@width}{\tqft@depth}}
+  }%
+  \tqft@marshal
   \pgf@xb=\pgf@x
   \pgf@yb=\pgf@y
-  \pgfmathsetlength{\pgf@x}{\pgf@xc * \pgf@xa/20 + \pgf@yc * \pgf@xb/20}
-  \pgfmathsetlength{\pgf@y}{\pgf@xc * \pgf@ya/20 + \pgf@yc * \pgf@yb/20}
+  \pgf@process{
+    \pgftransformreset
+    \tqft@transformation
+    \pgfpointtransformed{\pgfqpoint{\the\pgf@xb}{\the\pgf@yb}}
   }
+}
 %    \end{macrocode}
 % Now we define the background path.
 % This is the upper part of the cobordism.
@@ -1301,7 +1312,7 @@ and the derived files           tqft.ins,
 %    \end{macrocode}
 % Apply the internal transformation
 %    \begin{macrocode}
-    \csname pgf@tqft@flow@\pgfkeysvalueof{/pgf/tqft/flow}\endcsname
+  \tqft@transformation
 %    \end{macrocode}
 % Draw the boundary circle
 %    \begin{macrocode}
@@ -1311,6 +1322,8 @@ and the derived files           tqft.ins,
 % We draw the upper and lower arcs again with the appropriate styles
 %    \begin{macrocode}
   \beforebackgroundpath{
+  \iftqft@within@node
+  \else
     \tikz@mode@fillfalse%
     \tikz@mode@drawfalse%
     \let\tikz@mode=\pgfutil@empty
@@ -1320,6 +1333,7 @@ and the derived files           tqft.ins,
       \tikzset{tqft/boundary lower style contents}
       \tikz@mode
       \tikz@options
+      \pgfsetstrokecolor{black}
       \pgfpathmoveto{\pgfqpoint{\tqft@width}{0pt}}
       \pgfpatharc{0}{\pgf@tqft@lower180}{\tqft@width and \tqft@depth}
       \edef\tikz@temp{\noexpand\pgfusepath{%
@@ -1343,6 +1357,7 @@ and the derived files           tqft.ins,
       \tikz@temp
       \pgfsys@endscope
     }
+    \fi
   }
   }
 %    \end{macrocode}
