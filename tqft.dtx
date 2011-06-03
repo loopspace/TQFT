@@ -204,6 +204,7 @@ and the derived files           tqft.ins,
 % There are certain common shapes that are predefined as aliases to the main shape with specified boundaries.
 %
 % The list of predefined shapes follows.
+% The names are all in the \Verb+tqft+ family, but an alias is made so that \Verb+tqft nodeshape+ will work without any further qualification.
 %
 % \begin{enumerate}
 % \item \Verb+pair of pants+
@@ -542,7 +543,7 @@ and the derived files           tqft.ins,
 \pgfkeys{
   /tikz/tqft/.style={%
     /tikz/shape=tqft cobordism,
-    /pgf/tqft/.cd,
+    /pgf/tqft,
     /tikz/every tqft
   },
   /pgf/tqft/.unknown/.code={%
@@ -552,8 +553,14 @@ and the derived files           tqft.ins,
     }
   },
   /tikz/every tqft/.style={},
-  /tikz/tqft/.search also={/pgf},
-  /pgf/tqft/.cd,
+  /tikz/tqft/.unknown/.code={%
+    \let\tqft@searchname=\pgfkeyscurrentname%
+    \pgfkeysalso{%
+      /pgf/tqft/\tqft@searchname=#1
+    }
+  },
+  /pgf/tqft/.is family,
+  /pgf/tqft,
   boundary circle/.style={
     /tikz/shape=tqft boundary circle
   },
@@ -627,11 +634,17 @@ and the derived files           tqft.ins,
     outgoing boundary components=2,
     offset=-.5
   },
+  /tikz/tqft pair of pants/.style={
+    /pgf/tqft/pair of pants,
+  },
   reverse pair of pants/.style={
     /tikz/tqft,
     incoming boundary components=2,
     outgoing boundary components=1,
     offset=.5
+  },
+  /tikz/tqft reverse pair of pants/.style={
+    /pgf/tqft/reverse pair of pants,
   },
   cylinder to prior/.style={
     /tikz/tqft,
@@ -639,27 +652,42 @@ and the derived files           tqft.ins,
     outgoing boundary components=1,
     offset=-.5
   },
+  /tikz/tqft cylinder to prior/.style={
+    /pgf/tqft/cylinder to prior,
+  },
   cylinder to next/.style={
     /tikz/tqft,
     incoming boundary components=1,
     outgoing boundary components=1,
     offset=.5
   },
+  /tikz/tqft cylinder to next/.style={
+    /pgf/tqft/cylinder to next,
+  },
   cylinder/.style={
     /tikz/tqft,
     incoming boundary components=1,
     outgoing boundary components=1
+  },
+  /tikz/tqft cylinder/.style={
+    /pgf/tqft/cylinder,
   },
   cup/.style={
     /tikz/tqft,
     incoming boundary components=1,
     outgoing boundary components=0
   },
+  /tikz/tqft cup/.style={
+    /pgf/tqft/cup,
+  },
   cap/.style={
     /tikz/tqft,
     incoming boundary components=0,
     outgoing boundary components=1
-  }
+  },
+  /tikz/tqft cap/.style={
+    /pgf/tqft/cap,
+  },
 }
 %    \end{macrocode}
 %
@@ -697,7 +725,7 @@ and the derived files           tqft.ins,
   \pgfkeysgetvalue{/pgf/tqft/flow transformation}{\tqft@transformation}
 }
 %    \end{macrocode}
-% For the externally available anchors, we need to save a few things with the flow transformation in place.
+% For the externally available anchors, we need to save a few things
 %
 % Position of first incoming boundary in internal coordinates 
 %    \begin{macrocode}
@@ -713,10 +741,21 @@ and the derived files           tqft.ins,
     \pgfmathsetlength{\pgf@y}{-.5 * \pgfkeysvalueof{/pgf/tqft/cobordism height}}
 }
 %    \end{macrocode}
+% For completeness, we record the size of the text box (not that we expect any text, but you never know)
+%    \begin{macrocode}
+\savedanchor{\tqft@textsize}{%
+  \pgf@y=-.5\ht\pgfnodeparttextbox%
+  \pgf@x=-.5\wd\pgfnodeparttextbox%
+}
+%    \end{macrocode}
+%
 % These are our externally available anchors
 %    \begin{macrocode}
   \anchor{centre}{\pgfpointorigin}
   \anchor{center}{\pgfpointorigin}
+\anchor{text}{
+  \tqft@textsize
+}
 \anchor{north}{%
   \pgf@ya=\tqft@height\relax
   \pgf@yb=.5\pgf@ya
@@ -924,7 +963,7 @@ and the derived files           tqft.ins,
     \ifnum\tqft@outgoing=0
      \advance\tqft@xb by \tqft@incoming\tqft@s
      \advance\tqft@xb by -\tqft@s
-     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
+     \pgfmathsetlength{\tqft@ch}{min(0,max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1)))}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@h}}
     \fi
     \fi
@@ -939,7 +978,7 @@ and the derived files           tqft.ins,
 % If we had incoming boundaries, this is a curveto, otherwise it's a moveto
 %    \begin{macrocode}
     \ifnum\tqft@incoming>0
-     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
+     \pgfmathsetlength{\tqft@ch}{min(0,max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1)))}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@h}}
     \else
      \pgfpathmoveto{\pgfqpoint{\tqft@xa}{-\tqft@h}}
@@ -970,10 +1009,10 @@ and the derived files           tqft.ins,
      \advance\tqft@xb by \tqft@s
     \ifnum\tqft@incoming>0
      \pgfmathsetlength{\tqft@xa}{\tqft@xa - (\tqft@outgoing -1 + \tqft@offset) * \tqft@separation - 2*\tqft@width}
-     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
+     \pgfmathsetlength{\tqft@ch}{min(0,max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1)))}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@h}}
     \else
-     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
+     \pgfmathsetlength{\tqft@ch}{min(0,max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1)))}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@h}}
     \fi
     \fi
@@ -1158,7 +1197,7 @@ and the derived files           tqft.ins,
     \ifnum\tqft@outgoing=0
      \advance\tqft@xb by \tqft@incoming\tqft@s
      \advance\tqft@xb by -\tqft@s
-     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
+     \pgfmathsetlength{\tqft@ch}{min(0,max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1)))}
     \pgfpathmoveto{\pgfqpoint{\tqft@xb}{\tqft@h}}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@h}}
     \fi
@@ -1174,7 +1213,7 @@ and the derived files           tqft.ins,
 % If we had incoming boundaries, this is a curveto, otherwise it's a moveto
 %    \begin{macrocode}
     \ifnum\tqft@incoming>0
-     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
+     \pgfmathsetlength{\tqft@ch}{min(0,max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1)))}
      \pgfpathmoveto{\pgfqpoint{\tqft@xb}{\tqft@h}}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@h}}
     \else
@@ -1207,10 +1246,10 @@ and the derived files           tqft.ins,
      \advance\tqft@xb by \tqft@s
     \ifnum\tqft@incoming>0
      \pgfmathsetlength{\tqft@xa}{\tqft@xa - (\tqft@outgoing -1 + \tqft@offset) * \tqft@separation - 2*\tqft@width}
-     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
+     \pgfmathsetlength{\tqft@ch}{min(0,max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1)))}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@ch}}{\pgfqpoint{\tqft@xa}{\tqft@h}}
     \else
-     \pgfmathsetlength{\tqft@ch}{max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1))}
+     \pgfmathsetlength{\tqft@ch}{min(0,max(-\tqft@h,\tqft@h - (\tqft@h - \tqft@c) * ((abs(\tqft@xb - \tqft@xa) - \tqft@w)/\tqft@s + 1)))}
      \pgfpathcurveto{\pgfqpoint{\tqft@xb}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@ch}}{\pgfqpoint{\tqft@xa}{-\tqft@h}}
     \fi
     \fi
@@ -1332,10 +1371,20 @@ and the derived files           tqft.ins,
    \savedanchor{\tqft@centre}{%
   \pgfpointorigin}
 %    \end{macrocode}
+% For completeness, we record the size of the text box (not that we expect any text, but you never know)
+%    \begin{macrocode}
+\savedanchor{\tqft@textsize}{%
+  \pgf@y=-.5\ht\pgfnodeparttextbox%
+  \pgf@x=-.5\wd\pgfnodeparttextbox%
+}
+%    \end{macrocode}
 % These are our externally available anchors
 %    \begin{macrocode}
   \anchor{centre}{\tqft@centre}
   \anchor{center}{\tqft@centre}
+\anchor{text}{
+  \tqft@textsize
+}
   \anchor{next}{%
   \tqft@process{\tqft@separation}{0pt}}%
 %    \end{macrocode}

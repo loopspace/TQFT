@@ -32,6 +32,11 @@
 
 \begin{document}
 \begin{tikzpicture}
+\node[tqft pair of pants,draw,circle width=2cm,circle depth=1cm,cobordism height=8cm,boundary separation=2cm] {};
+\end{tikzpicture}
+\end{document}
+
+\begin{tikzpicture}
 \node[regular polygon,regular polygon sides=3,draw] (a) {a};
 \node[regular polygon,regular polygon sides=4,draw] (b) at (3,0) {b};
 \foreach \k in {1,...,4} {
@@ -145,7 +150,7 @@
    outgoing boundary components=6,
    offset=-1.5,
    outer sep=1cm,
- ] (aa) {};
+ ] (aa) {hello world};
 % \fill (aa incoming 2.90) circle[radius=2pt];
  \fill (aa outgoing 5.270) circle[radius=2pt];
 % \fill (aa incoming 2.centre) circle[radius=2pt];
@@ -200,7 +205,7 @@
    incoming boundary components=4,
    outgoing boundary components=6,
    offset=-1.5,
- ] at (5,0) (b) {};
+ ] at (5,0) (b) {hello world};
 \fill[red] (b.centre) circle[radius=2pt];
  \fill[red] (b.next) circle[radius=2pt] node[pin=north:next] {};
  \fill[red] (b.prior) circle[radius=2pt] node[pin=north:prior] {};
@@ -221,3 +226,7 @@
  \end{tikzpicture}
 
 \end{document}
+
+% Local Variables:
+% tex-output-type: "pdf18"
+% End:
