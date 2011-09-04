@@ -446,7 +446,7 @@ and the derived files           tqft.ins,
 %    \begin{macrocode}
   \savedmacro{\tqft@offset}{\edef\tqft@offset{\pgfkeysvalueof{/pgf/tqft/offset}}}
 %    \end{macrocode}
-% Now we save our dimensions: height, separation, the radii of the boundary circles, and outer sep
+% Now we save our dimensions: height, separation, the radii of the boundary circles, and outer seps, and the heights of the control points.
 %    \begin{macrocode}
   \saveddimen{\tqft@height}{\pgf@x=\pgfkeysvalueof{/pgf/tqft/cobordism height}}
   \saveddimen{\tqft@separation}{\pgf@x=\pgfkeysvalueof{/pgf/tqft/boundary separation}}
@@ -460,13 +460,13 @@ and the derived files           tqft.ins,
   \pgfmathsetlength{\pgf@x}{.5 * \tqft@tempa - 4 * \tqft@tempb}
 }
 %    \end{macrocode}
-% Now save the internal transformation that is in place
+% This is the internal transformation that is in place
 %    \begin{macrocode}
    \savedmacro{\tqft@transformation}{%
   \pgfkeysgetvalue{/pgf/tqft/flow transformation}{\tqft@transformation}
 }
 %    \end{macrocode}
-% For the externally available anchors, we need to save a few things
+% For the externally available anchors, we need to save a few things as well.
 %
 % Position of first incoming boundary in internal coordinates 
 %    \begin{macrocode}
