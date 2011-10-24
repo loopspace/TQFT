@@ -28,13 +28,26 @@
     \pgfpathellipse{\pgfqpoint{0pt}{0pt}}{\pgfqpoint{1cm}{0pt}}{\pgfqpoint{0pt}{2cm}}
   }
 }
+
+\def\tqftpos#1#2{%
+  \tqft@process{#1}{#2}%
+  \showthe\pgf@x
+  \showthe\pgf@y
+}
 \makeatother
 
 \begin{document}
+\begin{tikzpicture}[shape=tqft cobordism]
+\begin{scope}[scale=2,rotate=45,tqft,flow=east,boundary lower style={draw,thick}]
+\node[tqft pair of pants,draw,transform shape] {};
+\end{scope}
+\end{tikzpicture}
+\end{document}
+
 \begin{tikzpicture}
 \node[tqft pair of pants,draw,circle width=2cm,circle depth=1cm,cobordism height=8cm,boundary separation=2cm] {};
 \end{tikzpicture}
-\end{document}
+
 
 \begin{tikzpicture}
 \node[regular polygon,regular polygon sides=3,draw] (a) {a};
