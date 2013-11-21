@@ -36,13 +36,25 @@
 }
 \makeatother
 
+\tikzset{tqft/flow = east}
+
 \begin{document}
+
+\begin{tikzpicture}[tqft/flow=east]
+\node[tqft pair of pants, draw, boundary lower style={draw}] (a) {};
+\node at (a.incoming boundary 1) {\(A\)};
+\node at (a.outgoing boundary 1) {\(A\)};
+\node at (a.outgoing boundary 2) {\(A\)};
+\node at (a) {\(\beta\)};
+\end{tikzpicture}
+\end{document}
+
 \begin{tikzpicture}[shape=tqft cobordism]
 \begin{scope}[scale=2,rotate=45,tqft,flow=east,boundary lower style={draw,thick}]
 \node[tqft pair of pants,draw,transform shape] {};
 \end{scope}
 \end{tikzpicture}
-\end{document}
+%\end{document}
 
 \begin{tikzpicture}
 \node[tqft pair of pants,draw,circle width=2cm,circle depth=1cm,cobordism height=8cm,boundary separation=2cm] {};
