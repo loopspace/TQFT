@@ -207,6 +207,7 @@ and the derived files            tqft.ins,
   \pgfmathsetmacro\tqft@x{(#1 - 1 + max(min(#2,1),0)*\tqft@val{offset}) * \tqft@val{boundary separation}}%
   \def\tqft@shift{(\tqft@x pt, \tqft@y pt)}%
 }%
+%    \end{macrocode}
 % Now we set up all the keys that we'll need in the course of this shape
 %    \begin{macrocode}
 \tikzset{
@@ -231,7 +232,7 @@ and the derived files            tqft.ins,
   tqft/.unknown/.code={%
     \let\tqft@searchname=\pgfkeyscurrentname%
     \pgfkeysalso{%
-      /tikz/\tqft@searchname=#1
+      /tikz/\tqft@searchname={#1}
     }
   },
 %    \end{macrocode}
@@ -622,6 +623,7 @@ and the derived files            tqft.ins,
         \tqft@bpath
         .. controls +(0,\tqft@ht*\tqft@val{cobordism height}) and +(0,\tqft@ht*\tqft@val{cobordism height}) .. (\xppos pt,-\tqft@val{cobordism height})
       }%
+%    \end{macrocode}
 % Add a coordinate at the midpoint.
 %    \begin{macrocode}
       \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components}/2 + \tqft@val{offset} -1/2) * \tqft@val{boundary separation}}%
@@ -874,6 +876,7 @@ and the derived files            tqft.ins,
           /tikz/tqft/outgoing boundary component \k/.try
         ];
       }%
+%    \end{macrocode}
 % Add an alias for the first.
 %    \begin{macrocode}
       \path node also[pic alias=-outgoing boundary] (-outgoing boundary 1);
@@ -908,9 +911,10 @@ and the derived files            tqft.ins,
 % Full outer path, clipped against the genus holes in case it is filled.
 %    \begin{macrocode}
       \begin{scope}
-      \path[clip] \tqft@gclip;
+      \path[overlay,clip] \tqft@gclip;
       \path[
-        /tikz/tqft/cobordism/.try
+        /tikz/tqft/cobordism/.try,
+        pic actions
       ] \tqft@fullpath;
       \end{scope}
 %    \end{macrocode}

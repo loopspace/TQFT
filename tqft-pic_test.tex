@@ -1,38 +1,3 @@
-\documentclass{article}
-\usepackage{tikz}
-\usetikzlibrary{tqft}
-
-\begin{document}
-\begin{tikzpicture}
-\pic[
-  name=d,
-  tqft cup,
-  cobordism/.style={fill=red!50}];
-\pic[
-  name=a,
-  tqft reverse pair of pants,
-  genus=2,
-  cobordism/.style={fill=red!50},
-  genus style/.style={draw},
-  view from=incoming,
-  every outgoing upper boundary component/.style={draw, dashed, ultra thick},
-  at=(d-incoming boundary),
-  anchor=outgoing boundary
-];
-\pic[
-  name=b,
-  tqft cylinder to next,
-  anchor=outgoing boundary 1,
-  at=(a-incoming boundary),
-  cobordism edge/.style={draw}
-];
-\pic[name=c,tqft cylinder to prior,anchor=outgoing boundary 1,cobordism edge/.style={draw},at=(a-incoming boundary 2)];
-\fill (a-hole 1) circle[radius=2pt]  (a-hole 2) circle[radius=2pt];
-\fill (a-outgoing boundary.70) circle[radius=2pt];
-\fill (a-outgoing boundary.110) circle[radius=2pt];
-\end{tikzpicture}
-\end{document}
-
 \immediate\write18{tex tqft-pic.dtx}
 \documentclass{article}
 \usepackage{tikz}
@@ -60,8 +25,9 @@
 \begin{document}
 
 \begin{tikzpicture}
-\draw (0,0) .. controls +(0,1) and +(0,-1) .. (2,1);
+\pic[tqft cap,draw];
 \end{tikzpicture}
+\end{document}
 
 \begin{tikzpicture}
 \pic[
