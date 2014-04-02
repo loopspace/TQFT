@@ -1,10 +1,32 @@
 \immediate\write18{tex tqft.dtx}
+\immediate\write18{tex tqft-pic.dtx}
 \documentclass{article}
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric}
-\usepackage{tqft}
+\usetikzlibrary{shapes.geometric,tqft}
+%\usepackage{tqft}
+
+\pgfkeys{
+  /do stuff/.code={
+    \message{doing stuff}
+  },
+  /stuff/.is family,
+  /stuff/.style={/do stuff},
+  /stuff/.cd,
+  do stuff/.code={
+    \message{doing more stuff}
+  },
+  /stuff,
+  do stuff
+}
 
 \makeatletter
+
+\ifcsname pgfk@/handlers/.pic/.@cmd\endcsname
+\message{hello}
+\else
+\message{goodbye}
+\fi
+
 \pgfdeclareshape{test shape}{
   \savedanchor{\centerpoint}{
     \pgfmoveto{\pgfqpoint{0pt}{0pt}}
@@ -34,11 +56,484 @@
   \showthe\pgf@x
   \showthe\pgf@y
 }
+
+
+%% %\tikzset{tqft/flow = east}
+%% \pgfkeys{/pgf/tqft/genus/.initial = 0}
+%% \pgfkeys{/pgf/tqft/anchor/.initial = none}
+%% \tikzset{show name/.code={\show\tikz@fig@name}}
+%% \def\tqftval#1{\pgfkeysvalueof{/pgf/tqft/#1}}
+
+%% \tikzset{
+%%   cobordism/.pic={
+%% % Defining the cobordism paths
+%%       \gdef\tqft@fullpath{}%
+%%       \gdef\tqft@bpath{}%
+%%       \gdef\tqft@gclip{}%
+%%       \gdef\tqft@gpath{}%
+%%       \let\tqft@clist\pgfutil@gobble%
+%%       \ifnum\tqftval{incoming boundary components}>0\relax
+%%       \xdef\tqft@fullpath{%
+%%         \tqft@fullpath
+%%         (-\tqftval{circle width},0) arc[start %% angle=\pgf@tqft@upper180, end angle=0, x radius=\tqftval{circle %% width}, y radius=\tqftval{circle depth}]
+%%       }%
+%%       \xdef\tqft@bpath{\tqft@bpath (-\tqftval{circle width},0) %% (\tqftval{circle width},0)}%
+%%       \ifnum\tqftval{incoming boundary components}>1\relax
+%%       \foreach[
+%%         evaluate=\k as \xpos using (\k-1)*\tqftval{boundary %% separation} -\tqftval{circle width},
+%%         evaluate=\k as \cpos using (\k-1.5)*\tqftval{boundary %% separation},
+%%         evaluate=\k as \kmo using int(\k-1)
+%%       ] \k in {2,...,\tqftval{incoming boundary components}} {
+%%         \xdef\tqft@fullpath{%
+%%           \tqft@fullpath
+%%            .. controls +(0,-\tqftval{cobordism height}/3) and %% +(0,-\tqftval{cobordism height}/3) ..  (\xpos pt,0) arc[start %% angle=\pgf@tqft@upper180, end angle=0, x radius=\tqftval{circle %% width}, y radius=\tqftval{circle depth}]
+%%       }%
+%%         \xdef\tqft@bpath{%
+%%           \tqft@bpath
+%%            .. controls +(0,-\tqftval{cobordism height}/3) and %% +(0,-\tqftval{cobordism height}/3) .. (\xpos pt,0) %% ++(2*\tqftval{circle width},0)
+%%       }%
+%%       \xdef\tqft@clist{%
+%%         \tqft@clist,-between incoming \kmo\space and \k/{(\cpos %% pt,-\tqftval{cobordism height}/4)}
+%%       }%
+%%       }%
+%%       \fi
+%%       \ifnum\tqftval{outgoing boundary components}>0\relax
+%%         \pgfmathsetmacro\xppos{(\tqftval{outgoing boundary components} %% -1+\tqftval{offset}) * \tqftval{boundary separation} +\tqftval{circle %% width}}
+%%       \xdef\tqft@fullpath{%
+%%         \tqft@fullpath
+%%         .. controls +(0,-\tqftval{cobordism height}/3) and %% +(0,\tqftval{cobordism height}/3) .. (\xppos pt, -\tqftval{cobordism %% height})
+%%       }%
+%%       \xdef\tqft@bpath{%
+%%         \tqft@bpath
+%%         .. controls +(0,-\tqftval{cobordism height}/3) and %% +(0,\tqftval{cobordism height}/3) .. (\xppos pt, -\tqftval{cobordism %% height})
+%%       }%
+%%       \pgfmathsetmacro\xppos{(\xppos + (\tqftval{incoming boundary %% components} -1) * \tqftval{boundary separation} +\tqftval{circle %% width})/2}%
+%%       \xdef\tqft@clist{%
+%%         \tqft@clist,-between last incoming and last outgoing/{(\xppos %% pt,-\tqftval{cobordism height}/2)}
+%%       }%
+%%       \else
+%%       \pgfmathsetmacro\tqftht{\tqftval{incoming boundary %% components}/(\tqftval{incoming boundary components}+1)}
+%%       \xdef\tqft@fullpath{%
+%%         \tqft@fullpath
+%%         .. controls +(0,-\tqftht*\tqftval{cobordism height}) and %% +(0,-\tqftht*\tqftval{cobordism height}) .. (-\tqftval{circle %% width},0)
+%%       }%
+%%       \xdef\tqft@bpath{%
+%%         \tqft@bpath
+%%         .. controls +(0,-\tqftht*\tqftval{cobordism height}) and %% +(0,-\tqftht*\tqftval{cobordism height}) .. (-\tqftval{circle %% width},0)
+%%       }%
+%%       \pgfmathsetmacro\xppos{(\tqftval{incoming boundary components} %% -1) * \tqftval{boundary separation}/2}%
+%%       \xdef\tqft@clist{%
+%%         \tqft@clist,-between first incoming and last incoming/{(\xppos %% pt,-\tqftht*\tqftval{cobordism height}*3/4)}
+%%       }%
+%%       \fi
+%%       \else
+%%       \ifnum\tqftval{outgoing boundary components}>0\relax
+%%         \pgfmathsetmacro\xppos{(\tqftval{outgoing boundary components} %% -1+\tqftval{offset}) * \tqftval{boundary separation} +\tqftval{circle %% width}}
+%%       \xdef\tqft@fullpath{%
+%%         \tqft@fullpath
+%%         (\xppos pt, -\tqftval{cobordism height})
+%%       }%
+%%       \xdef\tqft@bpath{%
+%%         \tqft@bpath
+%%         (\xppos pt, -\tqftval{cobordism height})
+%%       }%
+%%       \fi
+%%       \fi
+%% %
+%%       \ifnum\tqftval{outgoing boundary components}>0\relax
+%%       \pgfmathsetmacro\xppos{(\tqftval{outgoing boundary components} %% -1+\tqftval{offset}) * \tqftval{boundary separation} -\tqftval{circle %% width}}%
+%%       \xdef\tqft@fullpath{%
+%%         \tqft@fullpath
+%%         arc[end angle=\pgf@tqft@upper180, start angle=0, x %% radius=\tqftval{circle width}, y radius=\tqftval{circle depth}]
+%%       }%
+%%       \xdef\tqft@bpath{\tqft@bpath (\xppos pt,-\tqftval{cobordism %% height})}%
+%%       \ifnum\tqftval{outgoing boundary components}>1\relax
+%%       \foreach[
+%%         evaluate=\k as \xpos using (\tqftval{outgoing boundary %% components} - \k + \tqftval{offset})*\tqftval{boundary separation} + %% \tqftval{circle width},
+%%         evaluate=\k as \cpos using (\tqftval{outgoing boundary %% components} - \k + .5 + \tqftval{offset})*\tqftval{boundary %% separation},
+%%         evaluate=\k as \nk using int(\tqftval{outgoing boundary %% components} - \k + 1),
+%%         evaluate=\k as \nkpo using int(\tqftval{outgoing boundary %% components} - \k + 2),
+%%       ] \k in {2,...,\tqftval{outgoing boundary components}} {
+%%         \xdef\tqft@fullpath{%
+%%           \tqft@fullpath
+%%            .. controls +(0,\tqftval{cobordism height}/3) and %% +(0,\tqftval{cobordism height}/3) ..  (\xpos pt,-\tqftval{cobordism %% height}) arc[end angle=\pgf@tqft@upper180, start angle=0, x %% radius=\tqftval{circle width}, y radius=\tqftval{circle depth}]
+%%       }%
+%%         \xdef\tqft@bpath{%
+%%           \tqft@bpath
+%%            .. controls +(0,\tqftval{cobordism height}/3) and %% +(0,\tqftval{cobordism height}/3) ..  (\xpos pt,-\tqftval{cobordism %% height}) ++(-2*\tqftval{circle width},0)
+%%       }%
+%%       \xdef\tqft@clist{%
+%%         \tqft@clist,-between outgoing \nk\space and \nkpo/{(\cpos %% pt,-3*\tqftval{cobordism height}/4)}
+%%       }%
+%%       }%
+%%       \fi
+%%       \ifnum\tqftval{incoming boundary components}>0\relax
+%%       \xdef\tqft@fullpath{%
+%%         \tqft@fullpath
+%%         .. controls +(0,\tqftval{cobordism height}/3) and %% +(0,-\tqftval{cobordism height}/3) .. (-\tqftval{circle width},0)
+%%       }%
+%%       \xdef\tqft@bpath{%
+%%         \tqft@bpath
+%%         .. controls +(0,\tqftval{cobordism height}/3) and %% +(0,-\tqftval{cobordism height}/3) .. (-\tqftval{circle width},0)
+%%       }%
+%%       \xdef\tqft@clist{%
+%%         \tqft@clist,-between first incoming and first %% outgoing/{(\tqftval{offset}*\tqftval{boundary %% separation}/2-\tqftval{circle width},-\tqftval{cobordism height}/2)}
+%%       }%
+%%       \else
+%%       \pgfmathsetmacro\xppos{(\tqftval{outgoing boundary components} %% -1+\tqftval{offset}) * \tqftval{boundary separation} +\tqftval{circle %% width}}%
+%%       \pgfmathsetmacro\tqftht{\tqftval{outgoing boundary %% components}/(\tqftval{outgoing boundary components}+1)}
+%%       \xdef\tqft@fullpath{%
+%%         \tqft@fullpath
+%%         .. controls +(0,\tqftht*\tqftval{cobordism height}) and %% +(0,\tqftht*\tqftval{cobordism height}) .. (\xppos %% pt,-\tqftval{cobordism height})
+%%       }%
+%%       \xdef\tqft@bpath{%
+%%         \tqft@bpath
+%%         .. controls +(0,\tqftht*\tqftval{cobordism height}) and %% +(0,\tqftht*\tqftval{cobordism height}) .. (\xppos %% pt,-\tqftval{cobordism height})
+%%       }%
+%%       \fi
+%%       \fi
+%%       \pgfmathsetmacro\xpos{%
+%%         (
+%%         \tqftval{outgoing boundary components} > 0 ? 
+%%         (
+%%         \tqftval{incoming boundary components} > 0 ?
+%%         min(0,\tqftval{offset}) : \tqftval{offset}
+%%         ) : 0
+%%         )
+%%         *\tqftval{boundary separation} - 2*\tqftval{circle width}}%
+%%       \xdef\tqft@gclip{(\xpos pt,2*\tqftval{circle depth}) rectangle %% }%
+%%       \pgfmathsetmacro\xpos{%
+%%         ((
+%%         \tqftval{outgoing boundary components} > 0 ? 
+%%         (
+%%         \tqftval{incoming boundary components} > 0 ?
+%%         max(\tqftval{incoming boundary components},\tqftval{outgoing %% boundary components} + \tqftval{offset}) : \tqftval{outgoing boundary %% components} + \tqftval{offset}
+%%         ) : \tqftval{incoming boundary components}
+%%         )-1)
+%%         *\tqftval{boundary separation} + 2*\tqftval{circle width}}%
+%%       \xdef\tqft@gclip{\tqft@gclip (\xpos pt,-\tqftval{cobordism %% height} - 2*\tqftval{circle depth})}%
+%% % Figure out the genus paths
+%%       \ifnum\tqftval{genus}>0\relax
+%% % Work out the left-hand edge of the cobordism
+%%       \pgfmathsetmacro\xpos{%
+%%         (
+%%         \tqftval{outgoing boundary components} > 0 ? 
+%%         (
+%%         \tqftval{incoming boundary components} > 0 ?
+%%         \tqftval{offset}/2 : \tqftval{offset}
+%%         ) : 0
+%%         )
+%%         *\tqftval{boundary separation} - \tqftval{circle width}}%
+%% % Work out the height that the holes should be punched at
+%%       \pgfmathsetmacro\ypos{%
+%%         (
+%%         \tqftval{outgoing boundary components} > 0 ? 
+%%         (
+%%         \tqftval{incoming boundary components} > 0 ?
+%%         -\tqftval{cobordism height}/2 : -1 + \tqftval{cobordism %% height}/3
+%%         ) : - \tqftval{cobordism height}/3
+%%         )}%
+%% % Start our paths at these points
+%%       \xdef\tqft@gclip{%
+%%         \tqft@gclip
+%%         (\xpos pt,\ypos pt)
+%%       }%
+%%       \xdef\tqft@gpath{%
+%%         \tqft@gpath
+%%         (\xpos pt,\ypos pt)
+%%       }%
+%% % Now work out the width of the cobordism, in units of circle %% half-widths.
+%%       \pgfmathsetmacro\gsize{%
+%%         ((
+%%         \tqftval{outgoing boundary components} > 0 ? 
+%%         (
+%%         \tqftval{incoming boundary components} > 0 ?
+%%         max(\tqftval{incoming boundary components},\tqftval{outgoing %% boundary components} + \tqftval{offset}) : \tqftval{outgoing boundary %% components} + \tqftval{offset}
+%%         ) : \tqftval{incoming boundary components}
+%%         )-1)
+%%         *\tqftval{boundary separation}/\tqftval{circle width} + 2}%
+%% % Each hole should take up three half-widths, but we want a little %% extra on the edges so the total number of half-widths we want is %% 3*genus + 1
+%% %
+%% % Do we need to scale down the holes (we never scale up)?
+%% % If so, this holds the overall scale factor which we convert to x and %% y scales in points
+%%       \pgfmathsetmacro\gscale{min(1,\gsize/(3*\tqftval{genus}+1))}%
+%%       \pgfmathsetmacro\gyscale{\tqftval{circle depth}*\gscale*.707}%
+%%       \pgfmathsetmacro\gxscale{\tqftval{circle width}*\gscale}%
+%% % Each hole should take up 2 half widths, modulo scaling, so the total %% width used by the holes is 2*genus*gscale leaving gsize - %% 2*genus*gscale left for the gaps which is divided in to genus + 1 %% lots.
+%%       \pgfmathsetmacro\gsep{((\gsize - %% 2*\tqftval{genus}*\gscale)/(\tqftval{genus} + 1)*\tqftval{circle %% width}}%
+%%       \xdef\tqft@gclip{%
+%%         \tqft@gclip
+%%         ++(\gsep/2 pt,0)
+%%       }%
+%%       \xdef\tqft@gpath{%
+%%         \tqft@gpath
+%%         ++(\gsep/2 pt,0)
+%%       }%
+%%       \pgfmathsetmacro\xpos{1 - 1/sqrt(2)}%
+%%       \pgfmathsetmacro\sqrtwo{sqrt(2)}%
+%%       \foreach \k in {1,...,\tqftval{genus}} {
+%%         \xdef\tqft@gclip{%
+%%           \tqft@gclip
+%%           ++(\gsep/2 pt + \xpos*\gxscale pt,0)
+%%           .. controls +(\gxscale*\sqrtwo/3 pt,4/3*\gyscale pt) and %% +(-\gxscale*\sqrtwo/3 pt,4/3*\gyscale pt)
+%%           .. ++(\sqrtwo*\gxscale pt,0)
+%%           .. controls +(-\gxscale*\sqrtwo/3 pt,-4/3*\gyscale pt) and %% +(\gxscale*\sqrtwo/3 pt,-4/3*\gyscale pt)
+%%           .. ++(-\sqrtwo*\gxscale pt,0)
+%%           ++(2*\gxscale pt -\xpos*\gxscale pt + \gsep/2 pt,0)
+%%         }
+%%         \xdef\tqft@gpath{%
+%%           \tqft@gpath
+%%           ++(\gsep/2 pt,\pgf@tqft@upper\gyscale pt)
+%%           +(\gxscale pt,\pgf@tqft@lower\gyscale pt) %% coordinate[name=-hole \k]
+%%           ++(0,0)
+%%           .. controls +(\gxscale pt*2/3,\pgf@tqft@lower8/3*\gyscale %% pt) and +(-\gxscale pt*2/3,\pgf@tqft@lower8/3*\gyscale pt)
+%%           .. ++(2*\gxscale pt,0)
+%%           ++(0,\pgf@tqft@lower2*\gyscale pt)
+%%           ++(-\xpos*\gxscale pt,\pgf@tqft@upper\gyscale pt)
+%%           .. controls +(-\gxscale %% pt*\sqrtwo/3,\pgf@tqft@upper4/3*\gyscale pt) and +(\gxscale %% pt*\sqrtwo/3,\pgf@tqft@upper4/3*\gyscale pt)
+%%           .. ++(-\sqrtwo*\gxscale pt,0)
+%%           ++(-\xpos*\gxscale pt + 2*\gxscale pt + \gsep/2 pt,0)
+%%         }
+%%       }
+%%       \fi
+%% %
+%% % Now we start to lay out the cobordism
+%% %
+%% % Were we given a shift?  If so, shift.
+%% \gdef\tqft@shift{(0,0)}%
+%% \edef\tqft@anchor{-\tqftval{anchor}}%
+%% \foreach \anchor/\coord in \tqft@clist
+%% {
+%%   \ifx\anchor\tqft@anchor\relax
+%%   \expandafter\gdef\expandafter\tqft@shift\coord
+%%   \fi
+%% }%
+%% \tikz@scan@one@point\pgfutil@firstofone\tqft@shift\relax
+%% \begin{scope}[shift={(-\pgf@x,-\pgf@y)}]
+%% %
+%% % Incoming boundary components, nodes
+%%       \ifnum\tqftval{incoming boundary components}>0\relax
+%%       \foreach[evaluate=\k as \xpos using (\k-1)*\tqftval{boundary %% separation}] \k in {1,...,\tqftval{incoming boundary components}} {
+%%         \node[
+%%           node contents={},
+%%           ellipse,
+%%           inner sep=0pt,
+%%           outer sep=0pt,
+%%           minimum width=2*\tqftval{circle width},
+%%           minimum height=2*\tqftval{circle depth},
+%%           at={(\xpos pt,0)},
+%%           name=-incoming boundary \k,
+%%           /pgf/tqft/every boundary component/.try,
+%%           /pgf/tqft/every incoming boundary component/.try,
+%%           /pgf/tqft/incoming boundary component \k/.try
+%%         ];
+%%       }%
+%%       \fi
+%% % Outgoing boundary components, nodes
+%%       \ifnum\tqftval{outgoing boundary components}>0\relax
+%%       \foreach[
+%%         evaluate=\k as \xpos using %% (\k-1+\tqftval{offset})*\tqftval{boundary                   %% separation}
+%%       ] \k in {1,...,\tqftval{outgoing boundary components}} {
+%%           \node[
+%%           node contents={},
+%%           ellipse,
+%%           inner sep=0pt,
+%%           outer sep=0pt,
+%%           minimum width=2*\tqftval{circle width},
+%%           minimum height=2*\tqftval{circle depth},
+%%           at={(\xpos pt,-\tqftval{cobordism height})},
+%%           name=-outgoing boundary \k,
+%%           /pgf/tqft/every boundary component/.try,
+%%           /pgf/tqft/every outgoing boundary component/.try,
+%%           /pgf/tqft/outgoing boundary component \k/.try
+%%         ];
+%%       }%
+%%       \fi
+%% % Incoming boundary components, lower paths
+%%       \ifnum\tqftval{incoming boundary components}>0\relax
+%%       \foreach[evaluate=\k as \xpos using (\k-1)*\tqftval{boundary %% separation}] \k in {1,...,\tqftval{incoming boundary components}} {
+%%         \path[
+%%           /pgf/tqft/every lower boundary component/.try,
+%%           /pgf/tqft/every incoming lower boundary component/.try,
+%%           /pgf/tqft/incoming lower boundary component \k/.try
+%%         ] (\xpos pt - \tqftval{circle width},0) arc[start %% angle=\pgf@tqft@lower180,end angle=0, x radius=\tqftval{circle width}, %% y radius =\tqftval{circle depth}];
+%%       }%
+%%       \fi
+%% % Outgoing boundary components, lower paths
+%%       \ifnum\tqftval{outgoing boundary components}>0\relax
+%%       \foreach[
+%%         evaluate=\k as \xpos using %% (\k-1+\tqftval{offset})*\tqftval{boundary                   %% separation}
+%%       ] \k in {1,...,\tqftval{outgoing boundary components}} {
+%%         \path[
+%%           /pgf/tqft/every lower boundary component/.try,
+%%           /pgf/tqft/every outgoing lower boundary component/.try,
+%%           /pgf/tqft/outgoing lower boundary component \k/.try
+%%         ] (\xpos pt - \tqftval{circle width},-\tqftval{cobordism %% height}) arc[start angle=\pgf@tqft@lower180,end angle=0, x %% radius=\tqftval{circle width}, y radius =\tqftval{circle depth}];
+%%         }%
+%%       \fi
+%% % Full outer path, clipped against genus
+%%       \begin{scope}
+%%       \path[clip] \tqft@gclip;
+%%       \path[
+%%         /pgf/tqft/cobordism/.try
+%%       ] \tqft@fullpath;
+%%       \end{scope}
+%%       \path[
+%%         /pgf/tqft/cobordism/.try,
+%%         fill=none,
+%%         /pgf/tqft/cobordism edge/.try,
+%%         /pgf/tqft/genus style/.try
+%%       ] \tqft@gpath;
+%% % Non-boundary path
+%%       \path[
+%%         /pgf/tqft/cobordism edge/.try,
+%%         /pgf/tqft/cobordism outer edge/.try
+%%       ] \tqft@bpath;
+%% % Coordinates
+%%       \ifx\tqft@clist\pgfutil@gobble
+%%       \else
+%%       \foreach \name/\coord in \tqft@clist {
+%%         \path \coord node[coordinate,node contents={},name=\name];
+%%       }
+%%       \fi
+%% % Incoming boundary components, upper paths
+%%       \ifnum\tqftval{incoming boundary components}>0\relax
+%%       \foreach[evaluate=\k as \xpos using (\k-1)*\tqftval{boundary %% separation}] \k in {1,...,\tqftval{incoming boundary components}} {
+%%         \path[
+%%           /pgf/tqft/every upper boundary component/.try,
+%%           /pgf/tqft/every incoming upper boundary component/.try,
+%%           /pgf/tqft/incoming upper boundary component \k/.try
+%%         ] (\xpos pt - \tqftval{circle width},0) arc[start %% angle=\pgf@tqft@upper180,end angle=0, x radius=\tqftval{circle width}, %% y radius =\tqftval{circle depth}];
+%%       }
+%%       \fi
+%% % Outgoing boundary components, upper paths
+%%       \ifnum\tqftval{outgoing boundary components}>0\relax
+%%       \foreach[
+%%         evaluate=\k as \xpos using %% (\k-1+\tqftval{offset})*\tqftval{boundary                   %% separation}
+%%       ] \k in {1,...,\tqftval{outgoing boundary components}} {
+%%         \path[
+%%           /pgf/tqft/every upper boundary component/.try,
+%%           /pgf/tqft/every outgoing upper boundary component/.try,
+%%           /pgf/tqft/outgoing upper boundary component \k/.try
+%%         ] (\xpos pt - \tqftval{circle width},-\tqftval{cobordism %% height}) arc[start angle=\pgf@tqft@upper180,end angle=0, x %% radius=\tqftval{circle width}, y radius =\tqftval{circle depth}];
+%%       }
+%%       \fi
+%% \end{scope}
+%%   }
+%% }
 \makeatother
-
-\tikzset{tqft/flow = east}
-
 \begin{document}
+
+\begin{tikzpicture}
+\draw (0,0) --  node[name=a,coordinate] {} (2,0) .. controls +(1,0) and +(0,-1) .. node[coordinate,name=b] {} (4,1) ++(2,0) -- ++(2,0);
+\draw[<-] (a) -- ++(0,1);
+\draw[<-] (b) -- ++(0,1);
+\foreach \coord in {{(0,0)},{(1,0)}} {
+  \node (c) at \coord {};
+  \draw (2,2) -- (c);
+}
+\end{tikzpicture}
+
+\begin{tikzpicture}[
+  tqft,
+  every outgoing boundary component/.style={fill=blue!50},
+  outgoing boundary component 3/.style={fill=none,draw=red},
+  every incoming boundary component/.style={fill=green!50},
+  every lower boundary component/.style={draw,ultra thick, dashed},
+  every upper boundary component/.style={draw,purple},
+  cobordism/.style={fill=red!50},
+  cobordism edge/.style={draw},
+  genus=3,
+  genus style/.style={draw},
+  view from=incoming,
+  anchor=between incoming 1 and 2
+]
+\pic[name=a,tqft,incoming boundary components=2,outgoing boundary components=3,offset=-.5]{cobordism};
+\begin{scope}[every pin edge/.style={<-}]
+\foreach \anchor/\ang in {
+  hole 1/-90,
+  incoming boundary 2/90,
+  outgoing boundary 3/-90,
+  between last incoming and last outgoing/0,
+  between first incoming and first outgoing/180,
+  between incoming 1 and 2/90,
+  between outgoing 1 and 2/-90,
+  between outgoing 2 and 3/-90
+} {
+  \node[pin=\ang:\anchor,at=(a-\anchor)] {};
+}
+\draw[<-] (0,0) -- ++(0,3);
+\end{scope}
+\end{tikzpicture}
+
+
+\begin{tikzpicture}[
+  tqft,
+  every outgoing boundary component/.style={fill=blue!50},
+  outgoing boundary component 3/.style={fill=none,draw=red},
+  every incoming boundary component/.style={fill=green!50},
+  every lower boundary component/.style={draw,ultra thick, dashed},
+  every upper boundary component/.style={draw,purple},
+  cobordism/.style={fill=red!50},
+  cobordism edge/.style={draw},
+  genus=3,
+  genus style/.style={draw},
+  view from=incoming,
+  anchor=between incoming 1 and 2
+]
+\pic[name=a,tqft,incoming boundary components=2,outgoing boundary components=3,offset=-.5]{cobordism};
+\end{tikzpicture}
+
+\begin{tikzpicture}[
+  tqft,
+  every outgoing boundary component/.style={fill=blue!50},
+  outgoing boundary component 3/.style={fill=none,draw=red},
+  every incoming boundary component/.style={fill=green!50},
+  every lower boundary component/.style={draw,ultra thick, dashed},
+  every upper boundary component/.style={draw,purple},
+  cobordism/.style={draw=red!50,ultra thick},
+  cobordism edge/.style={draw},
+  genus=1
+]
+\pic[name=a,tqft,incoming boundary components=3,outgoing boundary components=0,offset=-.5]{cobordism};
+\begin{scope}[every pin edge/.style={<-}]
+\foreach \anchor/\ang in {
+  hole 1/-90,
+  incoming boundary 2/90,
+  between first incoming and last incoming/-90
+} {
+  \node[pin=\ang:\anchor,at=(a-\anchor)] {};
+}
+\end{scope}
+\end{tikzpicture}
+
+\begin{tikzpicture}[
+  tqft,
+  every outgoing boundary component/.style={fill=blue!50},
+  outgoing boundary component 3/.style={fill=none,draw=red},
+  every incoming boundary component/.style={fill=green!50},
+  every lower boundary component/.style={draw,ultra thick, dashed},
+  every upper boundary component/.style={draw,purple},
+  cobordism/.style={draw=red!50,ultra thick},
+  cobordism edge/.style={draw},
+]
+\pic[name=a,tqft,incoming boundary components=0,outgoing boundary components=3,offset=-.5]{cobordism};
+\draw (a-between first and last outgoing) -- ++(0,2);
+\end{tikzpicture}
+
+\begin{tikzpicture}[tqft/flow=south]
+\node[draw,tqft,incoming boundary components=2,outgoing boundary components=3,offset=-.5] (a) {};
+\end{tikzpicture}
+
+\begin{tikzpicture}
+%\draw (0,0) .. controls +(2,4/3) and +(-2,4/3) .. (6,0);
+\draw (0,1) .. controls +(2,-4/3) and +(-2,-4/3) .. (6,1);
+\draw (3,0) -- (3,1);
+\pgfmathsetmacro\xpos{(1 - 1/sqrt(2))/2}
+\pgfmathsetmacro\sqrtwo{1/sqrt(2)}
+\draw (6*\xpos,.5) .. controls +(2*\sqrtwo,2/3) and +(-2*\sqrtwo,2/3) .. (6 - 6*\xpos,.5);
+\end{tikzpicture}
+
 
 \begin{tikzpicture}[tqft/flow=east]
 \node[tqft pair of pants, draw, boundary lower style={draw}] (a) {};
@@ -47,7 +542,7 @@
 \node at (a.outgoing boundary 2) {\(A\)};
 \node at (a) {\(\beta\)};
 \end{tikzpicture}
-\end{document}
+
 
 \begin{tikzpicture}[shape=tqft cobordism]
 \begin{scope}[scale=2,rotate=45,tqft,flow=east,boundary lower style={draw,thick}]
@@ -161,6 +656,24 @@
 \node[pin=west:west] at (a.west) {};
 \node[pin=east:east] at (a.east) {};
  \end{tikzpicture}
+
+
+\begin{tikzpicture}[
+  tqft,
+  every outgoing boundary component/.style={fill=blue!50},
+  outgoing boundary component 3/.style={fill=none,draw=red},
+  every incoming boundary component/.style={fill=green!50},
+  every lower boundary component/.style={draw,ultra thick, dashed},
+  every upper boundary component/.style={draw,purple},
+  cobordism/.style={fill=red!50},
+  cobordism edge/.style={draw},
+  genus=3,
+  genus style/.style={draw},
+  view from=incoming,
+  anchor=between incoming 1 and 2
+]
+\pic[name=a,tqft,incoming boundary components=4,outgoing boundary components=6,offset=-1.5]{cobordism};
+\end{tikzpicture}
 
 \begin{tikzpicture}[every tqft/.style={cobordism style={draw,thick,red}}]
  \node[

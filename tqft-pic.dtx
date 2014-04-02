@@ -1,0 +1,987 @@
+% \iffalse meta-comment
+%<*internal>
+\iffalse
+%</internal>
+%<*readme>
+----------------------------------------------------------------
+tqft --- a style file for drawing TQFT diagrams with TikZ/PGF
+E-mail: stacey@math.ntnu.no
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+----------------------------------------------------------------
+
+This package defines some node shapes useful for drawing TQFT diagrams with TikZ/PGF.
+%</readme>
+%<*internal>
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+%</internal>
+%<*install>
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+----------------------------------------------------------------
+tqft --- a style file for drawing TQFT diagrams with TikZ/PGF
+E-mail: stacey@math.ntnu.no
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+----------------------------------------------------------------
+
+\endpreamble
+\postamble
+
+Copyright (C) 2011 by Andrew Stacey <stacey@math.ntnu.no>
+
+This work may be distributed and/or modified under the
+conditions of the LaTeX Project Public License (LPPL), either
+version 1.3c of this license or (at your option) any later
+version.  The latest version of this license is in the file:
+
+http://www.latex-project.org/lppl.txt
+
+This work is "maintained" (as per LPPL maintenance status) by
+Andrew Stacey.
+
+This work consists of the files  tqft.dtx,
+                                 tqft-pic.dtx,
+and the derived files            tqft.ins,
+                                 tqft.pdf,
+                                 tqft.sty,
+                                 tqft-pic.ins,
+                                 tqft-pic.pdf, and
+                                 tikzlibrarytqft.code.tex.
+
+\endpostamble
+\usedir{tex/latex/tqft}
+\generate{
+  \file{tikzlibrarytqft.code.tex}{\from{\jobname.dtx}{package}}
+}
+%</install>
+%<install>\endbatchfile
+%<*internal>
+\usedir{source/latex/tqft}
+\generate{
+  \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+}
+\nopreamble\nopostamble
+\usedir{doc/latex/demopkg}
+\generate{
+  \file{README.txt}{\from{\jobname.dtx}{readme}}
+}
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+%</internal>
+%<*package>
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tqft}[2011/05/03 v2.0 Tikz/PGF commands for drawing TQFT diagrams]
+%</package>
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+%\usepackage{morefloats}
+\usepackage{tikz}
+\usetikzlibrary{tqft}
+\usepackage[numbered]{hypdoc}
+\definecolor{lstbgcolor}{rgb}{0.9,0.9,0.9} 
+ 
+\usepackage{listings}
+\lstloadlanguages{[LaTeX]TeX}
+\lstset{breakatwhitespace=true,breaklines=true,language=TeX}
+ 
+\usepackage{fancyvrb}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{1595}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+%
+% \changes{1.0}{2011/05/03}{Converted to DTX file}
+%
+% \DoNotIndex{\newcommand,\newenvironment}
+%
+% \providecommand*{\url}{\texttt}
+% \GetFileInfo{tqft.dtx}
+% \title{The \textsf{tqft-pic} package: codebase}
+% \author{Andrew Stacey \\ \url{stacey@math.ntnu.no}}
+% \date{\fileversion~from \filedate}
+%
+% \maketitle
+%
+%
+% \begin{tikzpicture}
+% \pic[
+%   name=a,
+%   tqft,
+%   every outgoing boundary component/.style={fill=blue!50},
+%   outgoing boundary component 3/.style={fill=none,draw=red},
+%   every incoming boundary component/.style={fill=green!50},
+%   every lower boundary component/.style={draw,ultra thick, dashed},
+%   every upper boundary component/.style={draw,purple},
+%   cobordism/.style={fill=red!50},
+%   cobordism edge/.style={draw},
+%   genus=3,
+%   genus style/.style={draw},
+%   view from=incoming,
+%   anchor=between incoming 1 and 2
+%   incoming boundary components=4,
+%   outgoing boundary components=6,
+%   offset=-1.5,
+% ];
+% \node[pin=north:1] at (a-incoming boundary 1) {};
+% \node[pin=north:3] at (a-incoming boundary 3) {};
+% \node[pin=south:1] at (a-outgoing boundary 1) {};
+% \node[pin=south:4] at (a-outgoing boundary 4) {};
+% \node[pin=south:6] at (a-outgoing boundary 6) {};
+% \end{tikzpicture}
+%
+% \section{Introduction}
+%
+% This is a package for drawing TQFT diagrams using PGF/TikZ.
+% Its inspiration was a question and answer on the website \url{http://tex.stackexchance.com}.
+%
+% This is the second version of this package and has been rewritten to use the \verb+pic+ facility of TikZ which was introduced in TikZ 3.0.
+%
+% \StopEventually{}
+%
+% \section{Implementation}
+%
+% \iffalse
+%<*package>
+% \fi
+%
+% Issue a warning if the pic syntax is not available.
+%
+%    \begin{macrocode}
+\ifcsname pgfk@/handlers/.pic/.@cmd\endcsname
+\else
+\pgfwarning{This library only works with TikZ 3.0 or later; for earlier versions of TikZ use the TQFT package}
+\fi
+%    \end{macrocode}
+% For the boundaries, we need elliptical node shapes.
+%    \begin{macrocode}
+\usetikzlibrary{shapes.geometric}
+%    \end{macrocode}
+% We can view the cobordisms from the \emph{input} or \emph{output} ends, the implementation of the choice is to draw an arc from 0 to 180 or from 0 to -180 so we just need to track minus signs.
+% These macros are for that.
+%    \begin{macrocode}
+\def\pgf@tqft@minus{-}
+\let\pgf@tqft@upper\@empty
+\let\pgf@tqft@lower\pgf@tqft@minus
+%    \end{macrocode}
+% Split an anchoring coordinate.
+% The \(y\)--value is simply multiplied by the cobordism height (but pointing downwards, so that \(1\) is level with the outgoing boundary).
+% The \(x\)--value is multiplied by the boundary separation, but is shifted so that at the incoming boundary level, or above, then it is in line with the incoming boundaries and similarly at the outgoing boundary level, or below, it is in line with the outgoing boundaries.
+%    \begin{macrocode}
+\def\tqft@split(#1,#2){%
+  \pgfmathsetmacro\tqft@y{#2 * (-\tqft@val{cobordism height})}%
+  \pgfmathsetmacro\tqft@x{(#1 - 1 + max(min(#2,1),0)*\tqft@val{offset}) * \tqft@val{boundary separation}}%
+  \def\tqft@shift{(\tqft@x pt, \tqft@y pt)}%
+}%
+% Now we set up all the keys that we'll need in the course of this shape
+%    \begin{macrocode}
+\tikzset{
+%    \end{macrocode}
+% Fix for the fact that the \verb+alias+ key doesn't use the prefix and suffix.
+%    \begin{macrocode}
+    pic alias/.code={%
+      \tikz@fig@mustbenamed
+      \expandafter\def\expandafter\tikz@alias\expandafter{\tikz@alias\pgfnodealias{\tikz@pp@name{#1}}{\tikz@fig@name}}%
+    },
+%    \end{macrocode}
+% This key is our basic installer key, setting the pic and putting us in the right key family.
+%    \begin{macrocode}
+  tqft/.style={%
+    pic type=cobordism,
+    every tqft/.try,
+    tqft/.cd,
+  },
+%    \end{macrocode}
+% This deals with unknown keys, passing them on to TikZ.
+%    \begin{macrocode}
+  tqft/.unknown/.code={%
+    \let\tqft@searchname=\pgfkeyscurrentname%
+    \pgfkeysalso{%
+      /tikz/\tqft@searchname=#1
+    }
+  },
+%    \end{macrocode}
+% Let's play happy families!
+%    \begin{macrocode}
+  tqft/.cd,
+%    \end{macrocode}
+% These set our number of boundary components and genus.
+%    \begin{macrocode}
+  incoming boundary components/.initial=5,
+  outgoing boundary components/.initial=4,
+  genus/.initial = 0,
+%    \end{macrocode}
+% This is the ``horizontal'' offset of the first outgoing component from the first incoming one.
+%    \begin{macrocode}
+  offset/.initial=0,
+%    \end{macrocode}
+% This is the ``vertical'' separation between boundary components.
+%    \begin{macrocode}
+  cobordism height/.initial=2cm,
+%    \end{macrocode}
+% This is the ``horizontal'' separation between boundary components.
+%    \begin{macrocode}
+  boundary separation/.initial=2cm,
+%    \end{macrocode}
+% These are the ``horizontal'' and ``vertical'' radii, respectively, of the boundary components.
+%    \begin{macrocode}
+  circle x radius/.initial=10pt,
+  circle y radius/.initial=5pt,
+%    \end{macrocode}
+% These control the direction from which we view the cobordism.
+%    \begin{macrocode}
+  view from/.is choice,
+  view from/incoming/.code={%
+    \let\pgf@tqft@upper\pgf@tqft@minus
+    \let\pgf@tqft@lower\@empty
+  },
+  view from/outgoing/.code={%
+  \let\pgf@tqft@lower\pgf@tqft@minus
+    \let\pgf@tqft@upper\@empty
+  },
+%    \end{macrocode}
+% We simulate node placement using the following key.
+%    \begin{macrocode}
+  anchor/.initial = none,
+%    \end{macrocode}
+% The next set of keys define some default shapes.
+%    \begin{macrocode}
+  pair of pants/.style={
+    /tikz/tqft,
+    incoming boundary components=1,
+    outgoing boundary components=2,
+    offset=-.5
+  },
+  /tikz/tqft pair of pants/.style={
+    /tikz/tqft/pair of pants,
+  },
+  reverse pair of pants/.style={
+    /tikz/tqft,
+    incoming boundary components=2,
+    outgoing boundary components=1,
+    offset=.5
+  },
+  /tikz/tqft reverse pair of pants/.style={
+    /tikz/tqft/reverse pair of pants,
+  },
+  cylinder to prior/.style={
+    /tikz/tqft,
+    incoming boundary components=1,
+    outgoing boundary components=1,
+    offset=-.5
+  },
+  /tikz/tqft cylinder to prior/.style={
+    /tikz/tqft/cylinder to prior,
+  },
+  cylinder to next/.style={
+    /tikz/tqft,
+    incoming boundary components=1,
+    outgoing boundary components=1,
+    offset=.5
+  },
+  /tikz/tqft cylinder to next/.style={
+    /tikz/tqft/cylinder to next,
+  },
+  cylinder/.style={
+    /tikz/tqft,
+    incoming boundary components=1,
+    outgoing boundary components=1
+  },
+  /tikz/tqft cylinder/.style={
+    /tikz/tqft/cylinder,
+  },
+  cup/.style={
+    /tikz/tqft,
+    incoming boundary components=1,
+    outgoing boundary components=0
+  },
+  /tikz/tqft cup/.style={
+    /tikz/tqft/cup,
+  },
+  cap/.style={
+    /tikz/tqft,
+    incoming boundary components=0,
+    outgoing boundary components=1
+  },
+  /tikz/tqft cap/.style={
+    /tikz/tqft/cap,
+  },
+}
+%    \end{macrocode}
+%
+% This is a little helper macro for getting the values of tqft keys.
+%    \begin{macrocode}
+\def\tqft@val#1{\pgfkeysvalueof{/tikz/tqft/#1}}
+%    \end{macrocode}
+%
+% Now we define the code for the actual cobordism shape.
+%    \begin{macrocode}
+\tikzset{
+  cobordism/.pic={
+%    \end{macrocode}
+% Defining the cobordism paths.
+% This holds the full boundary path of the cobordism shape.
+%    \begin{macrocode}
+      \gdef\tqft@fullpath{}%
+%    \end{macrocode}
+% This holds the edge without the boundary circles.
+%    \begin{macrocode}
+      \gdef\tqft@bpath{}%
+%    \end{macrocode}
+% This punches the holes (if there are any) in the cobordism shape.
+%    \begin{macrocode}
+      \gdef\tqft@gclip{}%
+%    \end{macrocode}
+% This is for drawing the holes.
+%    \begin{macrocode}
+      \gdef\tqft@gpath{}%
+%    \end{macrocode}
+% This collects any coordinates that are to be defined (it appears to be difficult to define them as we go along).
+%    \begin{macrocode}
+      \let\tqft@clist\pgfutil@gobble%
+%    \end{macrocode}
+% This collects any coordinates that can be used to shift the shape that aren't to be defined using \verb+\tqft@clist+.
+%    \begin{macrocode}
+      \let\tqft@alist\pgfutil@gobble
+%    \end{macrocode}
+% The first stage is to iterate over the incoming boundary components (if there are any), building up the various paths.
+%    \begin{macrocode}
+      \ifnum\tqft@val{incoming boundary components}>0\relax
+%    \end{macrocode}
+% We have some so draw the half circle for the first component.
+% Note that we use \verb+\pgf@tqft@upper+ to flip the sign of the start angle depending on the \verb+view from+ setting.
+%    \begin{macrocode}
+      \xdef\tqft@fullpath{%
+        \tqft@fullpath
+        (-\tqft@val{circle x radius},0) arc[start angle=\pgf@tqft@upper180, end angle=0, x radius=\tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
+      }%
+%    \end{macrocode}
+% Just add a move for the boundary path.
+%    \begin{macrocode}
+      \xdef\tqft@bpath{\tqft@bpath (-\tqft@val{circle x radius},0) (\tqft@val{circle x radius},0)}%
+%    \end{macrocode}
+% And add the centre to the list for available shifts.
+%    \begin{macrocode}
+      \xdef\tqft@alist{%
+        \tqft@alist,-incoming boundary 1/{(0,0)},-incoming boundary/{(0,0)}%
+      }%
+%    \end{macrocode}
+% If there are more than one then for each subsequent one we add the curve between them and the corresponding arc of the boundary circle.
+%    \begin{macrocode}
+      \ifnum\tqft@val{incoming boundary components}>1\relax
+      \foreach[
+        evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation} -\tqft@val{circle x radius},
+        evaluate=\k as \cpos using (\k-1.5)*\tqft@val{boundary separation},
+        evaluate=\k as \kmo using int(\k-1)
+      ] \k in {2,...,\tqft@val{incoming boundary components}} {
+%    \end{macrocode}
+% Add the curve and the arc.
+%    \begin{macrocode}
+        \xdef\tqft@fullpath{%
+          \tqft@fullpath
+           .. controls +(0,-\tqft@val{cobordism height}/3) and +(0,-\tqft@val{cobordism height}/3) ..  (\xpos pt,0) arc[start angle=\pgf@tqft@upper180, end angle=0, x radius=\tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
+      }%
+%    \end{macrocode}
+% But for the edge path, just the curve and a move.
+%    \begin{macrocode}
+        \xdef\tqft@bpath{%
+          \tqft@bpath
+           .. controls +(0,-\tqft@val{cobordism height}/3) and +(0,-\tqft@val{cobordism height}/3) .. (\xpos pt,0) ++(2*\tqft@val{circle x radius},0)
+      }%
+%    \end{macrocode}
+% We add a coordinate at the midpoint of the curve.
+%    \begin{macrocode}
+      \xdef\tqft@clist{%
+        \tqft@clist,-between incoming \kmo\space and \k/{(\cpos pt,-\tqft@val{cobordism height}/4)}%
+      }%
+%    \end{macrocode}
+% And add the centre to the list for available shifts.
+%    \begin{macrocode}
+      \xdef\tqft@alist{%
+        \tqft@alist,-incoming boundary \k/{(\kmo * \tqft@val{boundary separation},0)}%
+      }%
+      }%
+      \fi
+%    \end{macrocode}
+% We're at the edge of the last incoming boundary component.
+% What we do now depends on whether or not there are outgoing boundary components.
+%    \begin{macrocode}
+      \ifnum\tqft@val{outgoing boundary components}>0\relax
+%    \end{macrocode}
+% There are, so we add a curve from the end of the last incoming to the last outgoing component to the full path,
+%    \begin{macrocode}
+        \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components} -1+\tqft@val{offset}) * \tqft@val{boundary separation} +\tqft@val{circle x radius}}%
+      \pgfmathsetmacro\tqft@ht{abs(\tqft@val{incoming boundary components} - \tqft@val{outgoing boundary components} - \tqft@val{offset})}%
+      \pgfmathsetmacro\tqft@ht{1/3 + 2/3*\tqft@ht/(\tqft@ht + 1)}%
+      \xdef\tqft@fullpath{%
+        \tqft@fullpath
+        .. controls +(0,-\tqft@ht*\tqft@val{cobordism height}) and +(0,\tqft@ht*\tqft@val{cobordism height}) .. (\xppos pt, -\tqft@val{cobordism height})
+      }%
+%    \end{macrocode}
+% and the edge path.
+%    \begin{macrocode}
+      \xdef\tqft@bpath{%
+        \tqft@bpath
+        .. controls +(0,-\tqft@ht*\tqft@val{cobordism height}) and +(0,\tqft@ht*\tqft@val{cobordism height}) .. (\xppos pt, -\tqft@val{cobordism height})
+      }%
+%    \end{macrocode}
+% In addition, we add a coordinate at the midpoint.
+%    \begin{macrocode}
+      \pgfmathsetmacro\xppos{(\xppos + (\tqft@val{incoming boundary components} -1) * \tqft@val{boundary separation} +\tqft@val{circle x radius})/2}%
+      \xdef\tqft@clist{%
+        \tqft@clist,-between last incoming and last outgoing/{(\xppos pt,-\tqft@val{cobordism height}/2)}%
+      }%
+      \else
+%    \end{macrocode}
+% There aren't any outgoing boundary components so we loop back to the start.
+% We adjust the height of the control points to take into account the overall width.
+%    \begin{macrocode}
+      \pgfmathsetmacro\tqft@ht{1/3 + 2/3*(\tqft@val{incoming boundary components} - 1)/\tqft@val{incoming boundary components}}
+      \xdef\tqft@fullpath{%
+        \tqft@fullpath
+        .. controls +(0,-\tqft@ht*\tqft@val{cobordism height}) and +(0,-\tqft@ht*\tqft@val{cobordism height}) .. (-\tqft@val{circle x radius},0)
+      }%
+%    \end{macrocode}
+% Same for the edge path.
+%    \begin{macrocode}
+      \xdef\tqft@bpath{%
+        \tqft@bpath
+        .. controls +(0,-\tqft@ht*\tqft@val{cobordism height}) and +(0,-\tqft@ht*\tqft@val{cobordism height}) .. (-\tqft@val{circle x radius},0)
+      }%
+%    \end{macrocode}
+% Add a coordinate at the midpoint.
+%    \begin{macrocode}
+      \pgfmathsetmacro\xppos{(\tqft@val{incoming boundary components} -1) * \tqft@val{boundary separation}/2}%
+      \xdef\tqft@clist{%
+        \tqft@clist,-between first incoming and last incoming/{(\xppos pt,-\tqft@ht*\tqft@val{cobordism height}*3/4)}%
+      }%
+      \fi
+      \else
+%    \end{macrocode}
+% There weren't any incoming boundary components, so we test to see if there were any outgoing ones and move to the start of them.
+%    \begin{macrocode}
+      \ifnum\tqft@val{outgoing boundary components}>0\relax
+        \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components} -1+\tqft@val{offset}) * \tqft@val{boundary separation} +\tqft@val{circle x radius}}
+%    \end{macrocode}
+% Add a move to the full path,
+%    \begin{macrocode}
+      \xdef\tqft@fullpath{%
+        \tqft@fullpath
+        (\xppos pt, -\tqft@val{cobordism height})
+      }%
+%    \end{macrocode}
+% and the edge path.
+%    \begin{macrocode}
+      \xdef\tqft@bpath{%
+        \tqft@bpath
+        (\xppos pt, -\tqft@val{cobordism height})
+      }%
+      \fi
+      \fi
+%    \end{macrocode}
+% We're done with the incoming boundary components, now we're set up for the outgoing ones.
+% However we got there, if we have outgoing boundary components then we're now located at the start of them, although we're counting backwards.
+%    \begin{macrocode}
+      \ifnum\tqft@val{outgoing boundary components}>0\relax
+      \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components} -1+\tqft@val{offset}) * \tqft@val{boundary separation} -\tqft@val{circle x radius}}%
+%    \end{macrocode}
+% Draw the arc for the first (well, last actually) boundary component.
+%    \begin{macrocode}
+      \xdef\tqft@fullpath{%
+        \tqft@fullpath
+        arc[end angle=\pgf@tqft@upper180, start angle=0, x radius=\tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
+      }%
+%    \end{macrocode}
+% Add a move for the edge path.
+%    \begin{macrocode}
+      \xdef\tqft@bpath{\tqft@bpath (\xppos pt,-\tqft@val{cobordism height})}%
+%    \end{macrocode}
+% And add the centre to the list for available shifts.
+%    \begin{macrocode}
+      \xdef\tqft@alist{%
+        \tqft@alist,-outgoing boundary \tqft@val{outgoing boundary components}/{(\xppos pt + \tqft@val{circle x radius},-\tqft@val{cobordism height})},-outgoing boundary/{(\tqft@val{offset}*\tqft@val{boundary separation},-\tqft@val{cobordism height})}%
+      }%
+%    \end{macrocode}
+% Do we have more than one boundary component?
+%    \begin{macrocode}
+      \ifnum\tqft@val{outgoing boundary components}>1\relax
+%    \end{macrocode}
+% Yes, so add a curve and arc for each.
+%    \begin{macrocode}
+      \foreach[
+        evaluate=\k as \xpos using (\tqft@val{outgoing boundary components} - \k + \tqft@val{offset})*\tqft@val{boundary separation} + \tqft@val{circle x radius},
+        evaluate=\k as \cpos using (\tqft@val{outgoing boundary components} - \k + .5 + \tqft@val{offset})*\tqft@val{boundary separation},
+        evaluate=\k as \nk using int(\tqft@val{outgoing boundary components} - \k + 1),
+        evaluate=\k as \nkpo using int(\tqft@val{outgoing boundary components} - \k + 2),
+      ] \k in {2,...,\tqft@val{outgoing boundary components}} {
+%    \end{macrocode}
+% Both are added to the full path.
+%    \begin{macrocode}
+        \xdef\tqft@fullpath{%
+          \tqft@fullpath
+           .. controls +(0,\tqft@val{cobordism height}/3) and +(0,\tqft@val{cobordism height}/3) ..  (\xpos pt,-\tqft@val{cobordism height}) arc[end angle=\pgf@tqft@upper180, start angle=0, x radius=\tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
+      }%
+%    \end{macrocode}
+% Just the arc and a move for the edge path.
+%    \begin{macrocode}
+        \xdef\tqft@bpath{%
+          \tqft@bpath
+           .. controls +(0,\tqft@val{cobordism height}/3) and +(0,\tqft@val{cobordism height}/3) ..  (\xpos pt,-\tqft@val{cobordism height}) ++(-2*\tqft@val{circle x radius},0)
+      }%
+%    \end{macrocode}
+% And a coordinate at the midpoint.
+%    \begin{macrocode}
+      \xdef\tqft@clist{%
+        \tqft@clist,-between outgoing \nk\space and \nkpo/{(\cpos pt,-3*\tqft@val{cobordism height}/4)}%
+      }%
+%    \end{macrocode}
+% And add the centre to the list for available shifts.
+%    \begin{macrocode}
+      \xdef\tqft@alist{%
+        \tqft@alist,-outgoing boundary \nk/{(\xpos pt - \tqft@val{circle x radius},-\tqft@val{cobordism height})}%
+      }%
+      }%
+      \fi
+%    \end{macrocode}
+% Now we're at the end of the outgoing boundary components (well, the start actually).
+% What we do now depends on whether or not there are any incoming boundary components.
+%    \begin{macrocode}
+      \ifnum\tqft@val{incoming boundary components}>0\relax
+%    \end{macrocode}
+% There are, so we draw the path back up.
+%    \begin{macrocode}
+      \pgfmathsetmacro\tqft@ht{1/3 + 2/3*abs(\tqft@val{offset})/(abs(\tqft@val{offset}) + 1)}%
+      \xdef\tqft@fullpath{%
+        \tqft@fullpath
+        .. controls +(0,\tqft@ht*\tqft@val{cobordism height}) and +(0,-\tqft@ht*\tqft@val{cobordism height}) .. (-\tqft@val{circle x radius},0)
+      }%
+%    \end{macrocode}
+% And the edge path does the same.
+%    \begin{macrocode}
+      \xdef\tqft@bpath{%
+        \tqft@bpath
+        .. controls +(0,\tqft@ht*\tqft@val{cobordism height}) and +(0,-\tqft@ht*\tqft@val{cobordism height}) .. (-\tqft@val{circle x radius},0)
+      }%
+%    \end{macrocode}
+% Add a coordinate at the midpoint.
+%    \begin{macrocode}
+      \xdef\tqft@clist{%
+        \tqft@clist,-between first incoming and first outgoing/{(\tqft@val{offset}*\tqft@val{boundary separation}/2-\tqft@val{circle x radius},-\tqft@val{cobordism height}/2)}%
+      }%
+      \else
+%    \end{macrocode}
+% No incoming boundary components so loop back to the other end of the outgoing boundary components.
+%    \begin{macrocode}
+      \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components} -1+\tqft@val{offset}) * \tqft@val{boundary separation} +\tqft@val{circle x radius}}%
+      \pgfmathsetmacro\tqft@ht{1/3 + 2/3*(\tqft@val{outgoing boundary components} - 1)/\tqft@val{outgoing boundary components}}
+%    \end{macrocode}
+% Full path.
+%    \begin{macrocode}
+      \xdef\tqft@fullpath{%
+        \tqft@fullpath
+        .. controls +(0,\tqft@ht*\tqft@val{cobordism height}) and +(0,\tqft@ht*\tqft@val{cobordism height}) .. (\xppos pt,-\tqft@val{cobordism height})
+      }%
+%    \end{macrocode}
+% Edge path.
+%    \begin{macrocode}
+      \xdef\tqft@bpath{%
+        \tqft@bpath
+        .. controls +(0,\tqft@ht*\tqft@val{cobordism height}) and +(0,\tqft@ht*\tqft@val{cobordism height}) .. (\xppos pt,-\tqft@val{cobordism height})
+      }%
+% Add a coordinate at the midpoint.
+%    \begin{macrocode}
+      \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components}/2 + \tqft@val{offset} -1/2) * \tqft@val{boundary separation}}%
+      \pgfmathsetmacro\tqft@ht{1 -\tqft@ht*3/4}%
+      \xdef\tqft@clist{%
+        \tqft@clist,-between first and last outgoing/{(\xppos pt,-\tqft@ht*\tqft@val{cobordism height})}%
+      }%
+      \fi
+      \fi
+%    \end{macrocode}
+% Now we define the clip path for the genus holes.
+% We start with a big rectangle that \emph{ought} to be big enough to contain the whole shape.
+% We start with the top left corner.
+%    \begin{macrocode}
+      \pgfmathsetmacro\xpos{%
+        (
+        \tqft@val{outgoing boundary components} > 0 ? 
+        (
+        \tqft@val{incoming boundary components} > 0 ?
+        min(0,\tqft@val{offset}) : \tqft@val{offset}
+        ) : 0
+        )
+        *\tqft@val{boundary separation} - 2*\tqft@val{circle x radius}}%
+      \xdef\tqft@gclip{(\xpos pt,2*\tqft@val{circle y radius}) rectangle }%
+%    \end{macrocode}
+% Now the bottom right.
+%    \begin{macrocode}
+      \pgfmathsetmacro\xpos{%
+        ((
+        \tqft@val{outgoing boundary components} > 0 ? 
+        (
+        \tqft@val{incoming boundary components} > 0 ?
+        max(\tqft@val{incoming boundary components},\tqft@val{outgoing boundary components} + \tqft@val{offset}) : \tqft@val{outgoing boundary components} + \tqft@val{offset}
+        ) : \tqft@val{incoming boundary components}
+        )-1)
+        *\tqft@val{boundary separation} + 2*\tqft@val{circle x radius}}%
+%    \end{macrocode}
+% Together, these make a rectangle.
+%    \begin{macrocode}
+      \xdef\tqft@gclip{\tqft@gclip (\xpos pt,-\tqft@val{cobordism height} - 2*\tqft@val{circle y radius})}%
+%    \end{macrocode}
+% Are there any holes?
+%    \begin{macrocode}
+      \ifnum\tqft@val{genus}>0\relax
+%    \end{macrocode}
+% Yes, so first we need to figure out where to place them.
+% We work out the left-hand edge of the cobordism.
+%    \begin{macrocode}
+      \pgfmathsetmacro\xpos{%
+        (
+        \tqft@val{outgoing boundary components} > 0 ? 
+        (
+        \tqft@val{incoming boundary components} > 0 ?
+        \tqft@val{offset}/2 : \tqft@val{offset}
+        ) : 0
+        )
+        *\tqft@val{boundary separation} - \tqft@val{circle x radius}}%
+%    \end{macrocode}
+% Work out the height that the holes should be punched at.
+%    \begin{macrocode}
+      \pgfmathsetmacro\ypos{%
+        (
+        \tqft@val{outgoing boundary components} > 0 ? 
+        (
+        \tqft@val{incoming boundary components} > 0 ?
+        -\tqft@val{cobordism height}/2 : -1 + \tqft@val{cobordism height}/3
+        ) : - \tqft@val{cobordism height}/3
+        )}%
+%    \end{macrocode}
+% Start our paths at these points
+%    \begin{macrocode}
+      \xdef\tqft@gclip{%
+        \tqft@gclip
+        (\xpos pt,\ypos pt)
+      }%
+      \xdef\tqft@gpath{%
+        \tqft@gpath
+        (\xpos pt,\ypos pt)
+      }%
+%    \end{macrocode}
+% Now work out the width of the cobordism, in units of circle half-widths.
+% This may not be very accurate if there aren't any boundary components of a given type.
+%    \begin{macrocode}
+      \pgfmathsetmacro\gsize{%
+        ((
+        \tqft@val{outgoing boundary components} > 0 ? 
+        (
+        \tqft@val{incoming boundary components} > 0 ?
+        (\tqft@val{incoming boundary components} + \tqft@val{outgoing boundary components})/2 : \tqft@val{outgoing boundary components}
+        ) : \tqft@val{incoming boundary components}
+        )-1)
+        *\tqft@val{boundary separation}/\tqft@val{circle x radius} + 2}%
+%    \end{macrocode}
+% Each hole should take up three half-widths, but we want a little extra on the edges so the total number of half-widths we want is \(3g + 1\).
+% Do we need to scale down the holes (we never scale up)?
+% If so, \verb+\gscale+ holds the overall scale factor and \verb+\gxscale+ and \verb+gyscale+ are the resulting horizontal and vertical measurements.
+% The baseline is the size of the boundary circles.
+%    \begin{macrocode}
+      \pgfmathsetmacro\gscale{min(1,\gsize/(3*\tqft@val{genus}+1))}%
+      \pgfmathsetmacro\gyscale{\tqft@val{circle y radius}*\gscale*.707}%
+      \pgfmathsetmacro\gxscale{\tqft@val{circle x radius}*\gscale}%
+%    \end{macrocode}
+% Each hole should take up 2 half widths, modulo scaling, so the total width used by the holes is \(2 g s\) leaving \(w - 2 g s\) left for the gaps which is divided in to \(g + 1\) lots.
+%    \begin{macrocode}
+      \pgfmathsetmacro\gsep{((\gsize - 2*\tqft@val{genus}*\gscale)/(\tqft@val{genus} + 1)*\tqft@val{circle x radius}}%
+%    \end{macrocode}
+% We shift in by half of one unit of excess separation.
+%    \begin{macrocode}
+      \xdef\tqft@gclip{%
+        \tqft@gclip
+        ++(\gsep/2 pt,0)
+      }%
+      \xdef\tqft@gpath{%
+        \tqft@gpath
+        ++(\gsep/2 pt,0)
+      }%
+%    \end{macrocode}
+% Some useful quantities.
+%    \begin{macrocode}
+      \pgfmathsetmacro\omrstwo{1 - 1/sqrt(2)}%
+      \pgfmathsetmacro\sqrtwo{sqrt(2)}%
+%    \end{macrocode}
+% Now we iterate over the holes.
+%    \begin{macrocode}
+      \foreach[
+        evaluate=\k as \kmo using int(2 * \k-1)
+      ] \k in {1,...,\tqft@val{genus}} {
+%    \end{macrocode}
+% For the clipping path, we just want the bare hole.
+%    \begin{macrocode}
+        \xdef\tqft@gclip{%
+          \tqft@gclip
+%    \end{macrocode}
+% Move in by half an excess separation unit and move to the left-hand extent of the hole.
+%    \begin{macrocode}
+          ++(\gsep/2 pt + \omrstwo*\gxscale pt,0)
+%    \end{macrocode}
+% Now curve up over the hole,
+%    \begin{macrocode}
+          .. controls +(\gxscale*\sqrtwo/3 pt,4/3*\gyscale pt) and +(-\gxscale*\sqrtwo/3 pt,4/3*\gyscale pt)
+          .. ++(\sqrtwo*\gxscale pt,0)
+%    \end{macrocode}
+% and return on the underside.
+%    \begin{macrocode}
+          .. controls +(-\gxscale*\sqrtwo/3 pt,-4/3*\gyscale pt) and +(\gxscale*\sqrtwo/3 pt,-4/3*\gyscale pt)
+          .. ++(-\sqrtwo*\gxscale pt,0)
+%    \end{macrocode}
+% Lastly, move to the right-hand edge of the space taken up by this hole.
+%    \begin{macrocode}
+          ++(2*\gxscale pt -\omrstwo*\gxscale pt + \gsep/2 pt,0)
+        }
+%    \end{macrocode}
+% For the genus \emph{path} we want to add the little ``tails'' which means that the two curves are different, and we need to take into acount the \verb+view from+ direction.
+%    \begin{macrocode}
+        \xdef\tqft@gpath{%
+          \tqft@gpath
+%    \end{macrocode}
+% Move to the left-hand corner of the path, with the upper or lower chosen by the \verb+view from+ direction.
+%    \begin{macrocode}
+          ++(\gsep/2 pt,\pgf@tqft@upper\gyscale pt)
+%    \end{macrocode}
+% Return to the corner and add the larger of the two curves.
+%    \begin{macrocode}
+          ++(0,0)
+          .. controls +(\gxscale pt*2/3,\pgf@tqft@lower8/3*\gyscale pt) and +(-\gxscale pt*2/3,\pgf@tqft@lower8/3*\gyscale pt)
+          .. ++(2*\gxscale pt,0)
+%    \end{macrocode}
+% Now move to the starting point of the smaller curve and add that.
+%    \begin{macrocode}
+          ++(0,\pgf@tqft@lower2*\gyscale pt)
+          ++(-\omrstwo*\gxscale pt,\pgf@tqft@upper\gyscale pt)
+          .. controls +(-\gxscale pt*\sqrtwo/3,\pgf@tqft@upper4/3*\gyscale pt) and +(\gxscale pt*\sqrtwo/3,\pgf@tqft@upper4/3*\gyscale pt)
+          .. ++(-\sqrtwo*\gxscale pt,0)
+%    \end{macrocode}
+% Finally, get to the starting point for the next hole.
+%    \begin{macrocode}
+          ++(-\omrstwo*\gxscale pt + 2*\gxscale pt + \gsep/2 pt,0)
+        }
+%    \end{macrocode}
+% Add a coordinate at the centre of the hole.
+%    \begin{macrocode}
+        \xdef\tqft@clist{%
+          \tqft@clist,-hole \k/{(\xpos pt + \k * \gsep pt +  \kmo * \gxscale pt,\ypos pt)}%
+        }%
+      }%
+      \fi
+%    \end{macrocode}
+% Now we start to lay out the cobordism
+% Were we given a shift?  If so, shift.
+%    \begin{macrocode}
+\gdef\tqft@shift{(0,0)}%
+\edef\tqft@anchor{\tqft@val{anchor}}%
+\expandafter\pgfutil@in@\expandafter{\expandafter,\expandafter}\expandafter{\tqft@anchor}%
+\ifpgfutil@in@
+\expandafter\tqft@split\tqft@anchor\relax
+\else
+\edef\tqft@anchor{-\tqft@val{anchor}}%
+\xdef\tqft@alist{\tqft@clist,\tqft@alist}%
+\foreach \anchor/\coord in \tqft@alist
+{
+  \ifx\anchor\tqft@anchor\relax
+  \global\let\tqft@shift\coord
+  \fi
+}%
+\fi
+\tikz@scan@one@point\pgfutil@firstofone\tqft@shift\relax
+\begin{scope}[shift={(-\pgf@x,-\pgf@y)}]
+%    \end{macrocode}
+% At each incoming boundary component we place an elliptical node of the right size.
+%    \begin{macrocode}
+      \ifnum\tqft@val{incoming boundary components}>0\relax
+      \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in {1,...,\tqft@val{incoming boundary components}} {
+        \node[
+          node contents={},
+          ellipse,
+          inner sep=0pt,
+          outer sep=0pt,
+          minimum width=2*\tqft@val{circle x radius},
+          minimum height=2*\tqft@val{circle y radius},
+          at={(\xpos pt,0)},
+          name=-incoming boundary \k,
+          /tikz/tqft/every boundary component/.try,
+          /tikz/tqft/every incoming boundary component/.try,
+          /tikz/tqft/incoming boundary component \k/.try
+        ];
+      }%
+%    \end{macrocode}
+% Add an alias for the first.
+%    \begin{macrocode}
+      \path node also[pic alias=-incoming boundary] (-incoming boundary 1);
+      \fi
+%    \end{macrocode}
+% Same for the outgoing boundary components.
+%    \begin{macrocode}
+      \ifnum\tqft@val{outgoing boundary components}>0\relax
+      \foreach[
+        evaluate=\k as \xpos using (\k-1+\tqft@val{offset})*\tqft@val{boundary                   separation}
+      ] \k in {1,...,\tqft@val{outgoing boundary components}} {
+          \node[
+          node contents={},
+          ellipse,
+          inner sep=0pt,
+          outer sep=0pt,
+          minimum width=2*\tqft@val{circle x radius},
+          minimum height=2*\tqft@val{circle y radius},
+          at={(\xpos pt,-\tqft@val{cobordism height})},
+          name=-outgoing boundary \k,
+          /tikz/tqft/every boundary component/.try,
+          /tikz/tqft/every outgoing boundary component/.try,
+          /tikz/tqft/outgoing boundary component \k/.try
+        ];
+      }%
+% Add an alias for the first.
+%    \begin{macrocode}
+      \path node also[pic alias=-outgoing boundary] (-outgoing boundary 1);
+      \fi
+%    \end{macrocode}
+% Now we draw the lower paths of the incoming boundary components.
+%    \begin{macrocode}
+      \ifnum\tqft@val{incoming boundary components}>0\relax
+      \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in {1,...,\tqft@val{incoming boundary components}} {
+        \path[
+          /tikz/tqft/every lower boundary component/.try,
+          /tikz/tqft/every incoming lower boundary component/.try,
+          /tikz/tqft/incoming lower boundary component \k/.try
+        ] (\xpos pt - \tqft@val{circle x radius},0) arc[start angle=\pgf@tqft@lower180,end angle=0, x radius=\tqft@val{circle x radius}, y radius =\tqft@val{circle y radius}];
+      }%
+      \fi
+%    \end{macrocode}
+% Same for the outgoing boundary components.
+%    \begin{macrocode}
+      \ifnum\tqft@val{outgoing boundary components}>0\relax
+      \foreach[
+        evaluate=\k as \xpos using (\k-1+\tqft@val{offset})*\tqft@val{boundary                   separation}
+      ] \k in {1,...,\tqft@val{outgoing boundary components}} {
+        \path[
+          /tikz/tqft/every lower boundary component/.try,
+          /tikz/tqft/every outgoing lower boundary component/.try,
+          /tikz/tqft/outgoing lower boundary component \k/.try
+        ] (\xpos pt - \tqft@val{circle x radius},-\tqft@val{cobordism height}) arc[start angle=\pgf@tqft@lower180,end angle=0, x radius=\tqft@val{circle x radius}, y radius =\tqft@val{circle y radius}];
+        }%
+      \fi
+%    \end{macrocode}
+% Full outer path, clipped against the genus holes in case it is filled.
+%    \begin{macrocode}
+      \begin{scope}
+      \path[clip] \tqft@gclip;
+      \path[
+        /tikz/tqft/cobordism/.try
+      ] \tqft@fullpath;
+      \end{scope}
+%    \end{macrocode}
+% Now we draw the genus path, outside the clip.
+% We view this as part of the full cobordism path so try to apply the same style as for the full path, but if that is filled then we turn the fill off.
+% It can be turned back on again using the styles \verb+cobordism edge+ or \verb+genus style+.
+% We also apply the \verb+cobordism edge+ style as it could be thought of as part of the non-boundary edge.
+% Finally, it has its own style to enable overrides if the other two get confused.
+%    \begin{macrocode}
+      \path[
+        /tikz/tqft/cobordism/.try,
+        fill=none,
+        /tikz/tqft/cobordism edge/.try,
+        /tikz/tqft/genus style/.try
+      ] \tqft@gpath;
+%    \end{macrocode}
+% Now we redraw the non-boundary path.
+%    \begin{macrocode}
+      \path[
+        /tikz/tqft/cobordism edge/.try,
+        /tikz/tqft/cobordism outer edge/.try
+      ] \tqft@bpath;
+%    \end{macrocode}
+% There were various coordinates that we wanted to define but couldn't.
+% Here, we put those in place.
+%    \begin{macrocode}
+      \ifx\tqft@clist\pgfutil@gobble
+      \else
+      \foreach \name/\coord in \tqft@clist {
+        \path \coord node[coordinate,node contents={},name=\name];
+      }
+      \fi
+%    \end{macrocode}
+% The last task is to draw the upper paths of the boundary components.
+% First, incoming.
+%    \begin{macrocode}
+      \ifnum\tqft@val{incoming boundary components}>0\relax
+      \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in {1,...,\tqft@val{incoming boundary components}} {
+        \path[
+          /tikz/tqft/every upper boundary component/.try,
+          /tikz/tqft/every incoming upper boundary component/.try,
+          /tikz/tqft/incoming upper boundary component \k/.try
+        ] (\xpos pt - \tqft@val{circle x radius},0) arc[start angle=\pgf@tqft@upper180,end angle=0, x radius=\tqft@val{circle x radius}, y radius =\tqft@val{circle y radius}];
+      }
+      \fi
+%    \end{macrocode}
+% Next, outgoing.
+%    \begin{macrocode}
+      \ifnum\tqft@val{outgoing boundary components}>0\relax
+      \foreach[
+        evaluate=\k as \xpos using (\k-1+\tqft@val{offset})*\tqft@val{boundary                   separation}
+      ] \k in {1,...,\tqft@val{outgoing boundary components}} {
+        \path[
+          /tikz/tqft/every upper boundary component/.try,
+          /tikz/tqft/every outgoing upper boundary component/.try,
+          /tikz/tqft/outgoing upper boundary component \k/.try
+        ] (\xpos pt - \tqft@val{circle x radius},-\tqft@val{cobordism height}) arc[start angle=\pgf@tqft@upper180,end angle=0, x radius=\tqft@val{circle x radius}, y radius =\tqft@val{circle y radius}];
+      }
+      \fi
+\end{scope}
+%    \end{macrocode}
+% We're done!
+% Phew.
+%    \begin{macrocode}
+  }
+}
+%    \end{macrocode}
+% \iffalse
+%</package>
+% \fi
+%
+% \Finale
+
+\endinput
