@@ -359,25 +359,25 @@ and the derived files            tqft.ins,
 %    \begin{macrocode}
       \gdef\tqft@fullpath{}%
 %    \end{macrocode}
-% This holds the edge without the boundary circles.
+% This is a list of the edge pieces without the boundary circles.
 %    \begin{macrocode}
-      \gdef\tqft@bpath{}%
+      \global\let\tqft@blist\pgfutil@gobble%
 %    \end{macrocode}
 % This punches the holes (if there are any) in the cobordism shape.
 %    \begin{macrocode}
       \gdef\tqft@gclip{}%
 %    \end{macrocode}
-% This is for drawing the holes.
+% This is a list of the paths for drawing the holes.
 %    \begin{macrocode}
-      \gdef\tqft@gpath{}%
+      \global\let\tqft@glist\pgfutil@gobble%
 %    \end{macrocode}
 % This collects any coordinates that are to be defined (it appears to be difficult to define them as we go along).
 %    \begin{macrocode}
-      \let\tqft@clist\pgfutil@gobble%
+      \global\let\tqft@clist\pgfutil@gobble%
 %    \end{macrocode}
 % This collects any coordinates that can be used to shift the shape that aren't to be defined using \verb+\tqft@clist+.
 %    \begin{macrocode}
-      \let\tqft@alist\pgfutil@gobble
+      \global\let\tqft@alist\pgfutil@gobble
 %    \end{macrocode}
 % The first stage is to iterate over the incoming boundary components (if there are any), building up the various paths.
 %    \begin{macrocode}
@@ -391,10 +391,6 @@ and the derived files            tqft.ins,
         (-\tqft@val{circle x radius},0) arc[start angle=\pgf@tqft@upper180, end angle=0, x radius=\tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
       }%
 %    \end{macrocode}
-% Just add a move for the boundary path.
-%    \begin{macrocode}
-      \xdef\tqft@bpath{\tqft@bpath (-\tqft@val{circle x radius},0) (\tqft@val{circle x radius},0)}%
-%    \end{macrocode}
 % And add the centre to the list for available shifts.
 %    \begin{macrocode}
       \xdef\tqft@alist{%
@@ -406,6 +402,7 @@ and the derived files            tqft.ins,
       \ifnum\tqft@val{incoming boundary components}>1\relax
       \foreach[
         evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation} -\tqft@val{circle x radius},
+        evaluate=\k as \xppos using (\k-2)*\tqft@val{boundary separation} +\tqft@val{circle x radius},
         evaluate=\k as \cpos using (\k-1.5)*\tqft@val{boundary separation},
         evaluate=\k as \kmo using int(\k-1)
       ] \k in {2,...,\tqft@val{incoming boundary components}} {
@@ -417,11 +414,11 @@ and the derived files            tqft.ins,
            .. controls +(0,-\tqft@val{cobordism height}/3) and +(0,-\tqft@val{cobordism height}/3) ..  (\xpos pt,0) arc[start angle=\pgf@tqft@upper180, end angle=0, x radius=\tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
       }%
 %    \end{macrocode}
-% But for the edge path, just the curve and a move.
+% But for the edge path, just add the curve to the list.
 %    \begin{macrocode}
-        \xdef\tqft@bpath{%
-          \tqft@bpath
-           .. controls +(0,-\tqft@val{cobordism height}/3) and +(0,-\tqft@val{cobordism height}/3) .. (\xpos pt,0) ++(2*\tqft@val{circle x radius},0)
+        \xdef\tqft@blist{%
+          \tqft@blist,incoming boundary \k/incoming/{%
+      (\xppos pt,0) .. controls +(0,-\tqft@val{cobordism height}/3) and +(0,-\tqft@val{cobordism height}/3) .. (\xpos pt,0)}%
       }%
 %    \end{macrocode}
 % We add a coordinate at the midpoint of the curve.
@@ -455,9 +452,10 @@ and the derived files            tqft.ins,
 %    \end{macrocode}
 % and the edge path.
 %    \begin{macrocode}
-      \xdef\tqft@bpath{%
-        \tqft@bpath
-        .. controls +(0,-\tqft@ht*\tqft@val{cobordism height}) and +(0,\tqft@ht*\tqft@val{cobordism height}) .. (\xppos pt, -\tqft@val{cobordism height})
+      \xdef\tqft@blist{%
+        \tqft@blist,between last incoming and last outgoing/incoming and outgoing/{%
+        (\tqft@val{incoming boundary components} * \tqft@val{boundary separation} + \tqft@val{circle x radius} - \tqft@val{boundary separation},0pt)
+        .. controls +(0,-\tqft@ht*\tqft@val{cobordism height}) and +(0,\tqft@ht*\tqft@val{cobordism height}) .. (\xppos pt, -\tqft@val{cobordism height})}%
       }%
 %    \end{macrocode}
 % In addition, we add a coordinate at the midpoint.
@@ -479,9 +477,10 @@ and the derived files            tqft.ins,
 %    \end{macrocode}
 % Same for the edge path.
 %    \begin{macrocode}
-      \xdef\tqft@bpath{%
-        \tqft@bpath
-        .. controls +(0,-\tqft@ht*\tqft@val{cobordism height}) and +(0,-\tqft@ht*\tqft@val{cobordism height}) .. (-\tqft@val{circle x radius},0)
+      \xdef\tqft@blist{%
+        \tqft@blist,between first incoming and last incoming/incoming and outgoing/{%
+        (\tqft@val{incoming boundary components} * \tqft@val{boundary separation} + \tqft@val{circle x radius} - \tqft@val{boundary separation},0pt)
+        .. controls +(0,-\tqft@ht*\tqft@val{cobordism height}) and +(0,-\tqft@ht*\tqft@val{cobordism height}) .. (-\tqft@val{circle x radius},0)}
       }%
 %    \end{macrocode}
 % Add a coordinate at the midpoint.
@@ -504,13 +503,6 @@ and the derived files            tqft.ins,
         \tqft@fullpath
         (\xppos pt, -\tqft@val{cobordism height})
       }%
-%    \end{macrocode}
-% and the edge path.
-%    \begin{macrocode}
-      \xdef\tqft@bpath{%
-        \tqft@bpath
-        (\xppos pt, -\tqft@val{cobordism height})
-      }%
       \fi
       \fi
 %    \end{macrocode}
@@ -527,10 +519,6 @@ and the derived files            tqft.ins,
         arc[end angle=\pgf@tqft@upper180, start angle=0, x radius=\tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
       }%
 %    \end{macrocode}
-% Add a move for the edge path.
-%    \begin{macrocode}
-      \xdef\tqft@bpath{\tqft@bpath (\xppos pt,-\tqft@val{cobordism height})}%
-%    \end{macrocode}
 % And add the centre to the list for available shifts.
 %    \begin{macrocode}
       \xdef\tqft@alist{%
@@ -545,6 +533,7 @@ and the derived files            tqft.ins,
 %    \begin{macrocode}
       \foreach[
         evaluate=\k as \xpos using (\tqft@val{outgoing boundary components} - \k + \tqft@val{offset})*\tqft@val{boundary separation} + \tqft@val{circle x radius},
+        evaluate=\k as \xppos using (\tqft@val{outgoing boundary components} - \k + 1 + \tqft@val{offset})*\tqft@val{boundary separation} - \tqft@val{circle x radius},
         evaluate=\k as \cpos using (\tqft@val{outgoing boundary components} - \k + .5 + \tqft@val{offset})*\tqft@val{boundary separation},
         evaluate=\k as \nk using int(\tqft@val{outgoing boundary components} - \k + 1),
         evaluate=\k as \nkpo using int(\tqft@val{outgoing boundary components} - \k + 2),
@@ -557,11 +546,12 @@ and the derived files            tqft.ins,
            .. controls +(0,\tqft@val{cobordism height}/3) and +(0,\tqft@val{cobordism height}/3) ..  (\xpos pt,-\tqft@val{cobordism height}) arc[end angle=\pgf@tqft@upper180, start angle=0, x radius=\tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
       }%
 %    \end{macrocode}
-% Just the arc and a move for the edge path.
+% Just the arc for the edge paths.
 %    \begin{macrocode}
-        \xdef\tqft@bpath{%
-          \tqft@bpath
-           .. controls +(0,\tqft@val{cobordism height}/3) and +(0,\tqft@val{cobordism height}/3) ..  (\xpos pt,-\tqft@val{cobordism height}) ++(-2*\tqft@val{circle x radius},0)
+        \xdef\tqft@blist{%
+          \tqft@blist,between outgoing \nk\space and \nkpo/outgoing/{%
+ (\xppos pt,-\tqft@val{cobordism height})
+           .. controls +(0,\tqft@val{cobordism height}/3) and +(0,\tqft@val{cobordism height}/3) ..  (\xpos pt,-\tqft@val{cobordism height}) ++(-2*\tqft@val{circle x radius},0)}%
       }%
 %    \end{macrocode}
 % And a coordinate at the midpoint.
@@ -593,9 +583,10 @@ and the derived files            tqft.ins,
 %    \end{macrocode}
 % And the edge path does the same.
 %    \begin{macrocode}
-      \xdef\tqft@bpath{%
-        \tqft@bpath
-        .. controls +(0,\tqft@ht*\tqft@val{cobordism height}) and +(0,-\tqft@ht*\tqft@val{cobordism height}) .. (-\tqft@val{circle x radius},0)
+      \xdef\tqft@blist{%
+        \tqft@blist,between first incoming and first outgoing/incoming and outgoing/{%
+    (\tqft@val{offset} * \tqft@val{boundary separation} - \tqft@val{circle x radius},-\tqft@val{cobordism height})
+        .. controls +(0,\tqft@ht*\tqft@val{cobordism height}) and +(0,-\tqft@ht*\tqft@val{cobordism height}) .. (-\tqft@val{circle x radius},0)}%
       }%
 %    \end{macrocode}
 % Add a coordinate at the midpoint.
@@ -619,9 +610,10 @@ and the derived files            tqft.ins,
 %    \end{macrocode}
 % Edge path.
 %    \begin{macrocode}
-      \xdef\tqft@bpath{%
-        \tqft@bpath
-        .. controls +(0,\tqft@ht*\tqft@val{cobordism height}) and +(0,\tqft@ht*\tqft@val{cobordism height}) .. (\xppos pt,-\tqft@val{cobordism height})
+      \xdef\tqft@blist{%
+        \tqft@blist,between first and last outgoing/incoming and outgoing/{%
+    (\tqft@val{offset} * \tqft@val{boundary separation} - \tqft@val{circle x radius},-\tqft@val{cobordism height})
+        .. controls +(0,\tqft@ht*\tqft@val{cobordism height}) and +(0,\tqft@ht*\tqft@val{cobordism height}) .. (\xppos pt,-\tqft@val{cobordism height})}%
       }%
 %    \end{macrocode}
 % Add a coordinate at the midpoint.
@@ -693,14 +685,10 @@ and the derived files            tqft.ins,
         ) : - \tqft@val{cobordism height}/3
         )}%
 %    \end{macrocode}
-% Start our paths at these points
+% Start our clip path at this point
 %    \begin{macrocode}
       \xdef\tqft@gclip{%
         \tqft@gclip
-        (\xpos pt,\ypos pt)
-      }%
-      \xdef\tqft@gpath{%
-        \tqft@gpath
         (\xpos pt,\ypos pt)
       }%
 %    \end{macrocode}
@@ -734,10 +722,6 @@ and the derived files            tqft.ins,
 %    \begin{macrocode}
       \xdef\tqft@gclip{%
         \tqft@gclip
-        ++(\gsep/2 pt,0)
-      }%
-      \xdef\tqft@gpath{%
-        \tqft@gpath
         ++(\gsep/2 pt,0)
       }%
 %    \end{macrocode}
@@ -778,30 +762,23 @@ and the derived files            tqft.ins,
 %    \end{macrocode}
 % For the genus \emph{path} we want to add the little ``tails'' which means that the two curves are different, and we need to take into acount the \verb+view from+ direction.
 %    \begin{macrocode}
-        \xdef\tqft@gpath{%
-          \tqft@gpath
+        \xdef\tqft@glist{%
+          \tqft@glist,%
+            hole \k/lower/{%
 %    \end{macrocode}
-% Move to the left-hand corner of the path, with the upper or lower chosen by the \verb+view from+ direction.
+% Move to the starting point of the smaller curve and add that.
 %    \begin{macrocode}
-          ++(\gsep/2 pt,\pgf@tqft@upper\gyscale pt)
-%    \end{macrocode}
-% Return to the corner and add the larger of the two curves.
-%    \begin{macrocode}
-          ++(0,0)
-          .. controls +(\gxscale pt*2/3,\pgf@tqft@lower8/3*\gyscale pt) and +(-\gxscale pt*2/3,\pgf@tqft@lower8/3*\gyscale pt)
-          .. ++(2*\gxscale pt,0)
-%    \end{macrocode}
-% Now move to the starting point of the smaller curve and add that.
-%    \begin{macrocode}
-          ++(0,\pgf@tqft@lower2*\gyscale pt)
-          ++(-\omrstwo*\gxscale pt,\pgf@tqft@upper\gyscale pt)
+            (\xpos pt + \k * \gsep pt +  \kmo * \gxscale pt + \gxscale pt -\omrstwo*\gxscale pt,\ypos pt)
           .. controls +(-\gxscale pt*\sqrtwo/3,\pgf@tqft@upper4/3*\gyscale pt) and +(\gxscale pt*\sqrtwo/3,\pgf@tqft@upper4/3*\gyscale pt)
-          .. ++(-\sqrtwo*\gxscale pt,0)
+          .. ++(-\sqrtwo*\gxscale pt,0)},%
+% Move to the left-hand corner of the path, with the upper or lower chosen by the \verb+view from+ direction.
+          hole \k/upper/{(\xpos pt + \k * \gsep pt +  \kmo * \gxscale pt - \gxscale pt,\ypos pt + \pgf@tqft@upper\gyscale pt)%
 %    \end{macrocode}
-% Finally, get to the starting point for the next hole.
+% Add the larger of the two curves.
 %    \begin{macrocode}
-          ++(-\omrstwo*\gxscale pt + 2*\gxscale pt + \gsep/2 pt,0)
-        }
+          .. controls +(\gxscale pt*2/3,\pgf@tqft@lower8/3*\gyscale pt) and +(-\gxscale pt*2/3,\pgf@tqft@lower8/3*\gyscale pt)
+          .. ++(2*\gxscale pt,0)}%
+        }%
 %    \end{macrocode}
 % Add a coordinate at the centre of the hole.
 %    \begin{macrocode}
@@ -914,7 +891,8 @@ and the derived files            tqft.ins,
       \path[overlay,clip] \tqft@gclip;
       \path[
         /tikz/tqft/cobordism/.try,
-        pic actions
+        pic actions,
+        /tikz/tqft/cobordism outer path/.try,
       ] \tqft@fullpath;
       \end{scope}
 %    \end{macrocode}
@@ -924,19 +902,36 @@ and the derived files            tqft.ins,
 % We also apply the \verb+cobordism edge+ style as it could be thought of as part of the non-boundary edge.
 % Finally, it has its own style to enable overrides if the other two get confused.
 %    \begin{macrocode}
+\ifx\tqft@glist\pgfutil@gobble
+\else
+\foreach \tqft@gstyle/\tqft@gside/\tqft@gpath in \tqft@glist {
       \path[
         /tikz/tqft/cobordism/.try,
+        pic actions,
         fill=none,
+        shade=none,
         /tikz/tqft/cobordism edge/.try,
-        /tikz/tqft/genus style/.try
+        /tikz/tqft/genus style/.try,
+        /tikz/tqft/genus \tqft@gside/.try,
+        /tikz/tqft/\tqft@gstyle/.try,
+        /tikz/tqft/\tqft@gstyle\space\tqft@gside/.try,
       ] \tqft@gpath;
+}
+\fi
 %    \end{macrocode}
-% Now we redraw the non-boundary path.
+% Now we redraw the non-boundary paths.
 %    \begin{macrocode}
+\ifx\tqft@blist\pgfutil@gobble
+\else
+\foreach \tqft@bstyle/\tqft@btype/\tqft@bpath in \tqft@blist {
       \path[
         /tikz/tqft/cobordism edge/.try,
-        /tikz/tqft/cobordism outer edge/.try
+        /tikz/tqft/cobordism outer edge/.try,
+        /tikz/tqft/between \tqft@btype/.try,
+        /tikz/tqft/\tqft@bstyle/.try,
       ] \tqft@bpath;
+}
+\fi
 %    \end{macrocode}
 % There were various coordinates that we wanted to define but couldn't.
 % Here, we put those in place.

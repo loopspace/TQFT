@@ -34,7 +34,7 @@
 
 \providecommand*{\url}{\texttt}
 
-\title{The \textsf{tqft} TikZ Library: Documentation}
+\title{The \textsf{tqft} Ti\emph{k}Z Library: Documentation}
 \author{Andrew Stacey \\ \url{stacey@math.ntnu.no}}
 
 \begin{document}
@@ -124,7 +124,7 @@
 \end{center}
 
 \section{Introduction}
-This package defines some TikZ/PGF node shapes that can be used to construct the diagrams common in Topological Quantum Field Theory (TQFT).
+This package defines some Ti\emph{k}Z/PGF picture shapes that can be used to construct the diagrams common in Topological Quantum Field Theory (TQFT).
 An example follows:
 
 \begin{example}
@@ -134,6 +134,20 @@ An example follows:
 \pic[tqft/reverse pair of pants, anchor=incoming boundary 1,at=(a-outgoing boundary 2)];
 \end{tikzpicture}
 \end{example}
+
+\section{History}
+
+This is the second version of the TQFT package.
+The previous version used nodes to draw the shapes.
+However, with the advent of Ti\emph{k}Z3.0 came the ability to define subdrawings called \Verb+pic+s which were a bit like nodes but we geared more towards drawings than containers for text.
+This seems a much more suitable mechanism for drawing these diagrams and so the package has been rewritten to make use of this new facility.
+
+The two versions are, unfortunately, incompatible.
+This is primarily down to the fact that they use the same keys but in slightly different ways.
+It might be possible to fix that, but unless anyone actually needs it then I'm not going to bother figuring it out.
+
+
+\section{Keys}
 
 Before giving any details, a word is in order about the keys involved in this package.
 There are many options and keys that can be set via the \Verb+\pgfkeys+ system (which is used for setting options in Ti\emph{k}Z).
@@ -151,7 +165,7 @@ There is only one picture shape: \Verb+cobordism+.
 This is a cobordism between a number of incoming circles and a number of outgoing circles, where the numbers of boundary components can be specified as options to the shape.
 There are certain common shapes that are predefined as aliases to the main shape with specified boundaries.
 The list of predefined shapes follows.
-The names are all in the \Verb+tqft+ family, but an alias is made so that \Verb+tqft shape+ will work without any further qualification.
+The names are all in the \Verb+tqft+ family, but an alias is made so that \Verb+tqft <shape>+ will work without any further qualification.
 
 \begin{enumerate}
 \item \Verb+pair of pants+
@@ -245,22 +259,24 @@ This is the following list, with the corresponding key:
 
 \begin{enumerate}
 \item The boundary circles are drawn.
-These are actually elliptical nodes.
+These are actually elliptical nodes (and thus can be individually styled).
 Applicable styles:
 
 \begin{itemize}
 \item \Verb+every boundary component+,
-\item \Verb+every incoming boundary component+, or  \Verb+every outgoing boundary component+,
-\item \Verb+incoming boundary component <n>+, or \Verb+outgoing boundary component <n>+
+\item \Verb+every incoming boundary component+,\\
+or  \Verb+every outgoing boundary component+,
+\item \Verb+incoming boundary component <n>+,\\
+or \Verb+outgoing boundary component <n>+
 \end{itemize}
 
 \item The lower edges of the boundary circles are redrawn.
-These are arcs.
+These are individual arcs.
 
 \begin{itemize}
 \item \Verb+every lower boundary component+,
-\item \Verb+every incoming lower boundary component+, or  \Verb+every outgoing lower boundary component+,
-\item \Verb+incoming lower boundary component <n>+, or \Verb+outgoing lower boundary component <n>+
+\item \Verb+every incoming lower boundary component+,\\or  \Verb+every outgoing lower boundary component+,
+\item \Verb+incoming lower boundary component <n>+,\\or \Verb+outgoing lower boundary component <n>+
 \end{itemize}
 
 \item The full edge of the cobordism is drawn.
@@ -269,33 +285,53 @@ It is clipped against a path defined by the genus of the cobordism which results
 
 \begin{itemize}
 \item \Verb+cobordism+,
-\item also, any actions specified on the \Verb+pic+ are applied here (see the \Verb+pic actions+ key in the TikZ manual for full details on this).
+\item also, any actions specified on the \Verb+pic+ are applied here (see the \Verb+pic actions+ key in the Ti\emph{k}Z manual for full details on this),
+\item \Verb+cobordism outer path+.
 \end{itemize}
 
 \item Any holes specified by the genus are now drawn.
 These are styled to give the 3D impression, and this follows the direction specified by the \Verb+view from+ key.
+The paths are split so that each can be individually styled.
 
 \begin{itemize}
 \item \Verb+cobordism+, this style is applied because the curves defined by the genus can be thought of as part of the edge of the cobordism shape.
 However, following this key then \Verb+fill=none+ is issued.
 This is because even if the main shape is filled, the paths drawing the holes should almost certainly not be.
 \item \Verb+cobordism edge+, the same logic applies to the edge path (q.v.).
-\item \Verb+genus style+.
+\item \Verb+genus style+,
+\item \Verb+genus upper+ or \Verb+genus lower+,
+\item \Verb+hole <n>+,
+\item \Verb+hole <n> upper+ or \Verb+hole <n> lower+.
 \end{itemize}
 
 \item The non-boundary edge of the cobordism is redrawn.
+This is split in to pieces to allow for individual styling.
 
 \begin{itemize}
 \item \Verb+cobordism edge+,
-\item \Verb+cobordism outer edge+
+\item \Verb+cobordism outer edge+,
+\item \Verb+between incoming+, or \Verb+between outgoing+, or \Verb+between incoming and outgoing+.
+The latter is for the two sides, but note that if the cobordism has no incoming or no outgoing components then it also applies to the ``over the top'' edge.
+\item \Verb+<anchor>+, where the \Verb+<anchor>+ is the name of the anchor that lies on the midpoint of the curve, so it will be one of:
+%
+\begin{itemize}
+\item \Verb=between incoming <n> and <n+1>=
+\item \Verb=between outgoing <n> and <n+1>=
+\item \Verb+between first incoming and first outgoing+
+\item \Verb+between first incoming and first outgoing+,
+\item \Verb+between last incoming and last outgoing+,
+\item \Verb+between first and last incoming+,
+\item \Verb+between first and last outgoing+.
+\end{itemize}
 \end{itemize}
 
 \item The upper edges of the boundary circles are redrawn.
+These are arcs.
 
 \begin{itemize}
 \item \Verb+every upper boundary component+,
-\item \Verb+every incoming upper boundary component+, or  \Verb+every outgoing upper boundary component+,
-\item \Verb+incoming upper boundary component <n>+, or \Verb+outgoing upper boundary component <n>+
+\item \Verb+every incoming upper boundary component+,\\or  \Verb+every outgoing upper boundary component+,
+\item \Verb+incoming upper boundary component <n>+,\\or \Verb+outgoing upper boundary component <n>+
 \end{itemize}
 \end{enumerate}
 
@@ -323,6 +359,26 @@ Here is a progressively built up cobordism.
 \end{tikzpicture}
 \end{example}
 
+Here's an example with lots of styling.
+
+\begin{example}
+\begin{tikzpicture}
+\pic[
+  tqft,
+  incoming boundary components=3,
+  outgoing boundary components=3,
+  offset=1,
+  genus=3,
+  hole 3/.style={ultra thick, purple,solid},
+  genus lower/.style={dashed},
+  fill=red!50,
+  cobordism edge/.style={draw},
+  between incoming and outgoing/.style={dotted},
+  between outgoing 2 and 3/.style={ultra thick},
+];
+\end{tikzpicture}
+\end{example}
+
 \section{Anchors}
 
 The cobordism is a \Verb+pic+ so does not have any native anchors.
@@ -347,10 +403,10 @@ They are:
 \item \Verb=hole <n>=; if the genus is non-zero, this points to the centre of the \(n\)th hole.
 \end{itemize}
 
-To place the shape relative to an anchor, use the \Verb+anchor+ key.
+To place the shape relative to an anchor, use the \Verb+tqft/anchor+ key.
 The argument should be just the name of the anchor without the \Verb+<prefix>-+.
 The \Verb+anchor+ key can also take another type of argument.
-If its argument is of the form \Verb+(x,y)+ then this is taken as a pseudo-coordinate.
+If its argument is of the form \Verb+(x,y)+ then this is taken as a pseudo-coordinate\footnote{Note that due to the presence of the comma, this type of argument must be protected by braces.}.
 It is interpreted as being \(x\) boundary components across and \(y\) times the cobordism height down.
 However, if an \Verb+offset+ is specified then the resulting \(x\) value is shifted so that if \(y < 0\) then \((1,y)\) is in line with the first incoming boundary component and if \(y > 1\) then \((1,y)\) is in line with the first outgoing boundary component.
 If \(0 < y < 1\) then \((1,y)\) linearly interpolates between the first incoming and first outgoing boundary components.
@@ -370,6 +426,7 @@ incoming boundary 2/above right,
 outgoing boundary 1/below left,
 outgoing boundary 4/below right}
 \draw[overlay,shift=(a-\anchor)] plot[mark=x] coordinates{(0,0)} node[\placement] {\scriptsize\texttt{(a-\anchor)}};
+\path (a-incoming boundary) +(0,.5) (a-outgoing boundary) +(0,-1);
 \end{tikzpicture}
 \end{example}
 
@@ -423,4 +480,141 @@ Rather, the \Verb+name+ and \Verb+at+ have to be specified by keys and the \Verb
 }
 \end{tikzpicture}
 \end{example}
+
+%\begin{example}
+\begin{tikzpicture}
+\pic[
+  tqft,
+  incoming boundary components=3,
+  outgoing boundary components=2,
+  boundary separation=1.5cm,
+  offset=.5,
+  genus=2,
+  draw,
+  name=a
+];
+\pic[
+  tqft,
+  incoming boundary components=2,
+  outgoing boundary components=1,
+  boundary separation=1.5cm,
+  draw,
+  at=(a-outgoing boundary 1),
+  offset=.5,
+  cobordism height=1cm,
+  name=b
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=3,
+  draw,
+  at=(b-outgoing boundary 1),
+  offset=-1,
+  name=c
+];
+\pic[tqft,
+  incoming boundary components=2,
+  outgoing boundary components=1,
+  draw,
+  at=(c-outgoing boundary 1),
+  anchor=incoming boundary 2,
+  name=d,
+  boundary separation=1.6cm,
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(c-outgoing boundary 3),
+  offset=.5,
+  name=e
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(c-outgoing boundary 2),
+  name=f
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=2,
+  draw,
+  at=(f-outgoing boundary),
+  name=g,
+  offset=-.5,
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(g-outgoing boundary 1),
+  name=h,
+  offset=-.25,
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(g-outgoing boundary 2),
+  name=i,
+  offset=.25,
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(h-outgoing boundary),
+  name=j
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(i-outgoing boundary),
+  name=k
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(d-outgoing boundary),
+  name=l
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=0,
+  draw,
+  at=(l-outgoing boundary),
+  name=m
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(d-incoming boundary),
+  anchor=outgoing boundary,
+  name=n
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(n-incoming boundary),
+  anchor=outgoing boundary,
+  name=o
+];
+\pic[tqft,
+  incoming boundary components=3,
+  outgoing boundary components=3,
+  draw,
+  at=(o-incoming boundary),
+  anchor={(2,1)},
+  name=p,
+  boundary separation=1.25cm,
+];
+\path (j-outgoing boundary) ++(.5,-1) node {\Huge Sauron the Cobordant};
+\end{tikzpicture}
+%\end{example}
+
 \end{document}

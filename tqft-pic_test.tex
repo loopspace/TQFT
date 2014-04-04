@@ -3,6 +3,7 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric,tqft}
 %\usepackage{tqft}
+\thispagestyle{empty}
 
 \tikzset{
   do stuff/.code={
@@ -25,9 +26,141 @@
 \begin{document}
 
 \begin{tikzpicture}
+\pic[
+  tqft,
+  incoming boundary components=2,
+  outgoing boundary components=2,
+  genus=2,
+  draw,
+  name=a
+];
+\pic[
+  tqft,
+  incoming boundary components=2,
+  outgoing boundary components=1,
+  draw,
+  at=(a-outgoing boundary 1),
+  offset=.5,
+  cobordism height=1cm,
+  name=b
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=3,
+  draw,
+  at=(b-outgoing boundary 1),
+  offset=-1,
+  name=c
+];
+\pic[tqft,
+  incoming boundary components=2,
+  outgoing boundary components=1,
+  draw,
+  at=(c-outgoing boundary 1),
+  anchor=incoming boundary 2,
+  name=d,
+  boundary separation=1.5cm,
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(c-outgoing boundary 3),
+  offset=.5,
+  name=e
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(c-outgoing boundary 2),
+  name=f
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=2,
+  draw,
+  at=(f-outgoing boundary),
+  name=g,
+  offset=-.5,
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(g-outgoing boundary 1),
+  name=h,
+  offset=-.25,
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(g-outgoing boundary 2),
+  name=i,
+  offset=.25,
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(h-outgoing boundary),
+  name=j
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(i-outgoing boundary),
+  name=k
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(d-outgoing boundary),
+%  anchor={(1.5,0)},
+  name=l
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=0,
+  draw,
+  at=(l-outgoing boundary),
+  name=m
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(d-incoming boundary),
+  anchor=outgoing boundary,
+  name=n
+];
+\pic[tqft,
+  incoming boundary components=1,
+  outgoing boundary components=1,
+  draw,
+  at=(n-incoming boundary),
+  anchor=outgoing boundary,
+  name=o
+];
+\pic[tqft,
+  incoming boundary components=3,
+  outgoing boundary components=3,
+  draw,
+  at=(o-incoming boundary),
+  anchor={(2,1)},
+  name=p,
+  boundary separation=1.5cm,
+];
+\path (j-outgoing boundary) ++(.5,-1) node {\Huge Sauron the Cobordant};
+\end{tikzpicture}
+
+\begin{tikzpicture}
 \pic[tqft cap,draw];
 \end{tikzpicture}
-\end{document}
+
 
 \begin{tikzpicture}
 \pic[
@@ -68,7 +201,7 @@
   cobordism/.style={fill=red!50},
   cobordism edge/.style={draw},
   genus=3,
-  genus style/.style={draw},
+  hole 2/.style={ultra thick, blue},
   view from=incoming,
   anchor=between incoming 1 and 2
 ]
@@ -107,6 +240,27 @@
   anchor=between incoming 1 and 2
 ]
 \pic[name=a,tqft,incoming boundary components=2,outgoing boundary components=3,offset=0];
+\end{tikzpicture}
+
+\begin{tikzpicture}[
+  tqft,
+  every outgoing boundary component/.style={fill=blue!50},
+  outgoing boundary component 3/.style={fill=none,draw=red},
+  every incoming boundary component/.style={fill=green!50},
+  every lower boundary component/.style={draw,ultra thick, dashed},
+  every upper boundary component/.style={draw,purple},
+  cobordism/.style={fill=red!50},
+  cobordism edge/.style={draw},
+  genus=3,
+  genus style/.style={draw},
+  hole 3/.style={blue, ultra thick},
+  genus upper/.style={green},
+  hole 2 upper/.style={ultra thick},
+  between last incoming and last outgoing/.style={dashed},
+  view from=incoming,
+  anchor=between incoming 1 and 2
+]
+\pic[name=a,tqft,incoming boundary components=4,outgoing boundary components=3,offset=0];
 \end{tikzpicture}
 
 \begin{tikzpicture}[
@@ -155,6 +309,39 @@
 }
 \end{scope}
 \end{tikzpicture}
+
+
+\begin{tikzpicture}[tqft/cobordism/.style={draw}]
+\pic[
+  tqft,
+  incoming boundary components=0,
+  outgoing boundary components=2,
+  name=a
+];
+\pic[
+  tqft,
+  incoming boundary components=2,
+  outgoing boundary components=1,
+  name=b,
+  offset=.5,
+  at=(a-outgoing boundary 1)
+];
+\pic[
+  tqft,
+  incoming boundary components=1,
+  outgoing boundary components=2,
+  offset=-.5,
+  at=(b-outgoing boundary 1),
+  name=c
+];
+\pic[
+  tqft,
+  incoming boundary components=2,
+  outgoing boundary components=0,
+  at=(c-outgoing boundary 1)
+];
+\end{tikzpicture}
+
 \end{document}
 \begin{tikzpicture}[tqft/flow=south]
 \node[draw,tqft,incoming boundary components=2,outgoing boundary components=3,offset=-.5] (a) {};
