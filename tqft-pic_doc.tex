@@ -139,7 +139,7 @@ An example follows:
 
 This is the second version of the TQFT package.
 The previous version used nodes to draw the shapes.
-However, with the advent of Ti\emph{k}Z3.0 came the ability to define subdrawings called \Verb+pic+s which were a bit like nodes but we geared more towards drawings than containers for text.
+However, with the advent of Ti\emph{k}Z3.0 came the ability to define subdrawings called \Verb+pic+s which were a bit like nodes but were geared more towards drawings than containers for text.
 This seems a much more suitable mechanism for drawing these diagrams and so the package has been rewritten to make use of this new facility.
 
 The two versions are, unfortunately, incompatible.
@@ -154,10 +154,16 @@ There are many options and keys that can be set via the \Verb+\pgfkeys+ system (
 Such keys live in a ``directory'' but often that can be omitted.
 For example, in the Ti\emph{k}Z command \Verb+\draw[red] (0,0) -- (1,0);+ the key \Verb+red+ is actually in the ``directory'' \Verb+/tikz+ but it is not necessary to specify that as it is assumed.
 Defining a ``directory'' helps separate keys and ensure that there is no conflict.
-The keys in this library are (mostly) defined in the directory \Verb+/tikz/tqft+ but the very first call to a \Verb+tqft+ key will (in general) set the ``current directory'' to \Verb+/tikz/tqft+ and so all subsequent keys do not need prefixing.
+The keys in this library are (mostly) defined in the directory \Verb+/tikz/tqft+.
+Invoking \Verb+/tikz/tqft+ itself sets the ``current directory'' to \Verb+/tikz/tqft+ and so all subsequent keys do not need prefixing.
 Moreover, any unknown keys are passed on to the \Verb+/tikz+ directory so there is (or should be!) no harm in mixing \Verb+tqft+ specific keys with ordinary Ti\emph{k}Z keys.
 Some examples take advantage of this switch so when copying and modifying examples from this document, it is important to remember that the first \Verb+tqft+ specific key needs an explicit \Verb+tqft/+ prefix.
-More detailed information is in the section on styling.
+
+Specifically, the \Verb+/tikz/tqft+ key performs the following actions.
+It sets the \Verb+pic type+ to \Verb+cobordism+.
+It invokes the \Verb+/tikz/every tqft+ style.
+It switches the ``current directory'' to \Verb+/tikz/tqft+.
+
 
 \section{The Shapes}
 
@@ -255,7 +261,7 @@ These are spread out in a horizontal line in the middle of the shape.
 
 There are various options for styling the diagrams.
 To understand how they work, it is important to know the order in which a cobordism is drawn and how many pieces it decomposes into.
-This is the following list, with the corresponding key:
+This is the following list, with the corresponding keys:
 
 \begin{enumerate}
 \item The boundary circles are drawn.
@@ -285,7 +291,7 @@ It is clipped against a path defined by the genus of the cobordism which results
 
 \begin{itemize}
 \item \Verb+cobordism+,
-\item also, any actions specified on the \Verb+pic+ are applied here (see the \Verb+pic actions+ key in the Ti\emph{k}Z manual for full details on this),
+\item also, any actions specified on the \Verb+pic+ are applied here (specifically, the \Verb+pic actions+ key is invoked; see the Ti\emph{k}Z manual for full details on this),
 \item \Verb+cobordism outer path+.
 \end{itemize}
 
@@ -295,8 +301,10 @@ The paths are split so that each can be individually styled.
 
 \begin{itemize}
 \item \Verb+cobordism+, this style is applied because the curves defined by the genus can be thought of as part of the edge of the cobordism shape.
-However, following this key then \Verb+fill=none+ is issued.
-This is because even if the main shape is filled, the paths drawing the holes should almost certainly not be.
+\item \Verb+pic actions+, for the same reason as above.
+
+However, following this key then \Verb+fill=none,shade=none+ is issued.
+This is because even if the main shape is filled or shaded, the paths drawing the holes should almost certainly not be.
 \item \Verb+cobordism edge+, the same logic applies to the edge path (q.v.).
 \item \Verb+genus style+,
 \item \Verb+genus upper+ or \Verb+genus lower+,
@@ -315,9 +323,9 @@ The latter is for the two sides, but note that if the cobordism has no incoming 
 \item \Verb+<anchor>+, where the \Verb+<anchor>+ is the name of the anchor that lies on the midpoint of the curve, so it will be one of:
 %
 \begin{itemize}
-\item \Verb=between incoming <n> and <n+1>=
-\item \Verb=between outgoing <n> and <n+1>=
-\item \Verb+between first incoming and first outgoing+
+\item \Verb=between incoming <n> and <n+1>=,
+\item \Verb=between outgoing <n> and <n+1>=,
+\item \Verb+between first incoming and first outgoing+,
 \item \Verb+between first incoming and first outgoing+,
 \item \Verb+between last incoming and last outgoing+,
 \item \Verb+between first and last incoming+,
@@ -386,7 +394,7 @@ Nevertheless, a multitude of coordinates are defined that simulate the anchors a
 There is also support for specifying the shape to be located relative to a particular anchor.
 
 The \Verb+\pic+ should be named via the \Verb+name=<prefix>+ key, whereupon the anchors are prefixed by this value.
-The pseudo-anchors defined have the naming convention \Verb+<prefix>-<anchor name>+.
+The pseudo-anchors defined have the naming convention \Verb+<prefix>-<anchor name>+ (at the moment, it doesn't check to see if the \Verb+name+ key has been specified so if it isn't then the pseudo-anchors are still defined but with an empty prefix).
 They are:
 %
 \begin{itemize}
@@ -404,7 +412,7 @@ They are:
 \end{itemize}
 
 To place the shape relative to an anchor, use the \Verb+tqft/anchor+ key.
-The argument should be just the name of the anchor without the \Verb+<prefix>-+.
+The argument should be just the name of the anchor without the leading \Verb+<prefix>-+.
 The \Verb+anchor+ key can also take another type of argument.
 If its argument is of the form \Verb+(x,y)+ then this is taken as a pseudo-coordinate\footnote{Note that due to the presence of the comma, this type of argument must be protected by braces.}.
 It is interpreted as being \(x\) boundary components across and \(y\) times the cobordism height down.
@@ -439,6 +447,17 @@ This is better placed than the \Verb+every pic+ key since that applies to a surr
 \item If the \Verb+tqft+ key is invoked, either implicitly or explicitly, then the \Verb+pic type+ is set to \Verb+cobordism+.
 This has the side effect that the invoking syntax has to be completely set by keys; so the \Verb+pic (<name>) at (<coord>) {<type>}+ cannot be used.
 Rather, the \Verb+name+ and \Verb+at+ have to be specified by keys and the \Verb+type+ omitted.
+
+\item If upgrading from the previous version of TQFT, as well as shifting from a \Verb+node+ to a \Verb+pic+, the following changes have been made in the implementation:
+
+\begin{itemize}
+\item The \Verb+flow+ key has not made it across to the new version.
+Use \Verb+transform shape+ and apply your own transformation.
+
+\item The \Verb+circle width+ and \Verb+circle depth+ are now \Verb+circle x radius+ and \Verb+circle y radius+ (the old names weren't correct anyway).
+
+\item The bounding box is a little better, particularly for cobordisms with only one type of boundary component.
+\end{itemize}
 \end{enumerate}
 
 \section{More Examples}
@@ -485,10 +504,8 @@ Rather, the \Verb+name+ and \Verb+at+ have to be specified by keys and the \Verb
 \begin{tikzpicture}
 \pic[
   tqft,
-  incoming boundary components=3,
+  incoming boundary components=2,
   outgoing boundary components=2,
-  boundary separation=1.5cm,
-  offset=.5,
   genus=2,
   draw,
   name=a
@@ -497,7 +514,6 @@ Rather, the \Verb+name+ and \Verb+at+ have to be specified by keys and the \Verb
   tqft,
   incoming boundary components=2,
   outgoing boundary components=1,
-  boundary separation=1.5cm,
   draw,
   at=(a-outgoing boundary 1),
   offset=.5,
@@ -527,7 +543,8 @@ Rather, the \Verb+name+ and \Verb+at+ have to be specified by keys and the \Verb
   draw,
   at=(c-outgoing boundary 3),
   offset=.5,
-  name=e
+  name=e,
+  every outgoing lower boundary component/.style={draw}
 ];
 \pic[tqft,
   incoming boundary components=1,
@@ -565,14 +582,16 @@ Rather, the \Verb+name+ and \Verb+at+ have to be specified by keys and the \Verb
   outgoing boundary components=1,
   draw,
   at=(h-outgoing boundary),
-  name=j
+  name=j,
+  every outgoing lower boundary component/.style={draw}
 ];
 \pic[tqft,
   incoming boundary components=1,
   outgoing boundary components=1,
   draw,
   at=(i-outgoing boundary),
-  name=k
+  name=k,
+  every outgoing lower boundary component/.style={draw}
 ];
 \pic[tqft,
   incoming boundary components=1,
@@ -612,8 +631,20 @@ Rather, the \Verb+name+ and \Verb+at+ have to be specified by keys and the \Verb
   anchor={(2,1)},
   name=p,
   boundary separation=1.25cm,
+  outgoing lower boundary component 1/.style={draw},
+  outgoing lower boundary component 3/.style={draw}
 ];
-\path (j-outgoing boundary) ++(.5,-1) node {\Huge Sauron the Cobordant};
+\pic[tqft,
+  incoming boundary components=5,
+  outgoing boundary components=5,
+  genus=3,
+  at=(k-outgoing boundary),
+  anchor={(4,-1)},
+  draw,
+  name=q,
+  every outgoing lower boundary component/.style={draw}
+];
+\path (q-incoming boundary 3) ++(0,1) node {\Huge \(=\)};
 \end{tikzpicture}
 %\end{example}
 

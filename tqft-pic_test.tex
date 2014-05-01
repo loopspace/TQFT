@@ -1,30 +1,14 @@
-\immediate\write18{tex tqft-pic.dtx}
+\immediate\write18{tex tqft.dtx}
 \documentclass{article}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric,tqft}
-%\usepackage{tqft}
-\thispagestyle{empty}
+\usepackage{tqft}
 
 \tikzset{
-  do stuff/.code={
-    \message{doing stuff}
-  },
-  stuff/.style={
-    do stuff,
-    stuff/.cd,
-  },
-  stuff/.cd,
-  do stuff/.code={
-    \message{doing more stuff}
-  },
-}
-\tikzset{
-  stuff,
-  do stuff
+  tqft/use nodes=false,
 }
 
 \begin{document}
-
 \begin{tikzpicture}
 \pic[
   tqft,
@@ -311,7 +295,7 @@
 \end{tikzpicture}
 
 
-\begin{tikzpicture}[tqft/cobordism/.style={draw}]
+\begin{tikzpicture}[tqft/cobordism/.style={draw},every tqft/.style={transform shape},rotate=90,yscale=-1]
 \pic[
   tqft,
   incoming boundary components=0,
@@ -342,7 +326,8 @@
 ];
 \end{tikzpicture}
 
-\end{document}
+\tikzset{tqft/use nodes=true}
+
 \begin{tikzpicture}[tqft/flow=south]
 \node[draw,tqft,incoming boundary components=2,outgoing boundary components=3,offset=-.5] (a) {};
 \end{tikzpicture}
@@ -389,12 +374,6 @@
 }
 \end{tikzpicture}
 
-\begin{tikzpicture}
-\fill (0,0) circle[radius=2pt];
-\node[test shape,draw] (a) {};
-\node[test shape,draw] (b) at (3,0) {};
-\fill[red] (a) circle[radius=2pt];
-\end{tikzpicture}
 
 \begin{tikzpicture}[tqft/flow={east}]
 \fill[orange] (0,0) circle[radius=4pt];
@@ -481,6 +460,7 @@
 
 
 \begin{tikzpicture}[
+  tqft/use nodes=false,
   tqft,
   every outgoing boundary component/.style={fill=blue!50},
   outgoing boundary component 3/.style={fill=none,draw=red},
@@ -494,9 +474,11 @@
   view from=incoming,
   anchor=between incoming 1 and 2
 ]
-\pic[name=a,tqft,incoming boundary components=4,outgoing boundary components=6,offset=-1.5]{cobordism};
+\pic[name=a,tqft,incoming boundary components=4,outgoing boundary components=6,offset=-1.5];
 \end{tikzpicture}
-\end{document}
+
+
+
 \begin{tikzpicture}[every tqft/.style={cobordism style={draw,thick,red}}]
  \node[
    tqft,
