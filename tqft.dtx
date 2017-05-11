@@ -1313,6 +1313,8 @@ and the derived files            tqft.ins,
 %    \begin{macrocode}
   incoming boundary components/.initial=5,
   outgoing boundary components/.initial=4,
+  skip incoming boundary components/.initial={},
+  skip outgoing boundary components/.initial={},
   genus/.initial = 0,
 %    \end{macrocode}
 % This is the ``horizontal'' offset of the first outgoing component from the first incoming one.
@@ -1468,13 +1470,24 @@ and the derived files            tqft.ins,
 %    \end{macrocode}
 % If there are more than one then for each subsequent one we add the curve between them and the corresponding arc of the boundary circle.
 %    \begin{macrocode}
-      \ifnum\tqft@val{incoming boundary components}>1\relax
-      \foreach[
+    \ifnum\tqft@val{incoming boundary components}>1\relax
+    \global\let\tqft@ibdrylist=\pgfutil@gobble
+    \foreach \k in {2,...,\tqft@val{incoming boundary components}} {
+      \edef\tqft@temp{\noexpand\pgfutil@in@{,\k,}{,\tqft@val{skip incoming boundary components},}}
+      \tqft@temp
+      \ifpgfutil@in@
+      \else
+      \xdef\tqft@ibdrylist{\tqft@ibdrylist,\k}
+      \fi
+    }
+    \ifx\tqft@ibdrylist\pgfutil@gobble
+    \else
+    \foreach \k [
+      remember=\k as \kmo (initially 1),
         evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation} -\tqft@val{circle x radius},
-        evaluate=\k as \xppos using (\k-2)*\tqft@val{boundary separation} +\tqft@val{circle x radius},
-        evaluate=\k as \cpos using (\k-1.5)*\tqft@val{boundary separation},
-        evaluate=\k as \kmo using int(\k-1)
-      ] \k in {2,...,\tqft@val{incoming boundary components}} {
+    ] in \tqft@ibdrylist {
+      \pgfmathsetmacro\xppos{(\kmo - 1)*\tqft@val{boundary separation} + \tqft@val{circle x radius}}
+      \pgfmathsetmacro\cpos{(\xpos + \xppos)/2}
 %    \end{macrocode}
 % Add the curve and the arc.
 %    \begin{macrocode}
@@ -1501,7 +1514,8 @@ and the derived files            tqft.ins,
       \xdef\tqft@alist{%
         \tqft@alist,-incoming boundary \k/{(\kmo * \tqft@val{boundary separation},0)}%
       }%
-      }%
+    }%
+    \fi
       \fi
 %    \end{macrocode}
 % We're at the edge of the last incoming boundary component.
@@ -1600,13 +1614,25 @@ and the derived files            tqft.ins,
 %    \end{macrocode}
 % Yes, so add a curve and arc for each.
 %    \begin{macrocode}
-      \foreach[
+    \global\let\tqft@obdrylist=\pgfutil@gobble
+    \foreach \k [evaluate=\k as \ok using int(\tqft@val{outgoing boundary components} - \k + 1)] in {2,...,\tqft@val{outgoing boundary components}} {
+      \edef\tqft@temp{\noexpand\pgfutil@in@{,\ok,}{,\tqft@val{skip outgoing boundary components},}}
+      \tqft@temp
+      \ifpgfutil@in@
+      \else
+      \xdef\tqft@obdrylist{\tqft@obdrylist,\k}
+      \fi
+    }
+    \ifx\tqft@obdrylist\pgfutil@gobble
+    \else
+    \foreach \k [
+      remember=\k as \kmo (initially 1),
         evaluate=\k as \xpos using (\tqft@val{outgoing boundary components} - \k + \tqft@val{offset})*\tqft@val{boundary separation} + \tqft@val{circle x radius},
-        evaluate=\k as \xppos using (\tqft@val{outgoing boundary components} - \k + 1 + \tqft@val{offset})*\tqft@val{boundary separation} - \tqft@val{circle x radius},
-        evaluate=\k as \cpos using (\tqft@val{outgoing boundary components} - \k + .5 + \tqft@val{offset})*\tqft@val{boundary separation},
-        evaluate=\k as \nk using int(\tqft@val{outgoing boundary components} - \k + 1),
-        evaluate=\k as \nkpo using int(\tqft@val{outgoing boundary components} - \k + 2),
-      ] \k in {2,...,\tqft@val{outgoing boundary components}} {
+    ] in \tqft@obdrylist {
+      \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components} - \kmo + \tqft@val{offset})*\tqft@val{boundary separation} - \tqft@val{circle x radius}}
+        \pgfmathsetmacro\cpos{(\xpos + \xppos)/2}
+        \pgfmathsetmacro\nk{int(\tqft@val{outgoing boundary components} - \k + 1)}
+        \pgfmathsetmacro\nkpo{int(\tqft@val{outgoing boundary components} - \kmo + 1)}
 %    \end{macrocode}
 % Both are added to the full path.
 %    \begin{macrocode}
@@ -1635,7 +1661,8 @@ and the derived files            tqft.ins,
         \tqft@alist,-outgoing boundary \nk/{(\xpos pt - \tqft@val{circle x radius},-\tqft@val{cobordism height})}%
       }%
       }%
-      \fi
+    \fi
+    \fi
 %    \end{macrocode}
 % Now we're at the end of the outgoing boundary components (well, the start actually).
 % What we do now depends on whether or not there are any incoming boundary components.
@@ -1880,8 +1907,13 @@ and the derived files            tqft.ins,
 %    \end{macrocode}
 % At each incoming boundary component we place an elliptical node of the right size.
 %    \begin{macrocode}
-      \ifnum\tqft@val{incoming boundary components}>0\relax
-      \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in {1,...,\tqft@val{incoming boundary components}} {
+\ifnum\tqft@val{incoming boundary components}>0\relax
+\ifx\tqft@ibdrylist\pgfutil@gobble
+\xdef\tqft@ibdrylist{1}
+\else
+\xdef\tqft@ibdrylist{1,\tqft@ibdrylist}
+\fi
+      \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in \tqft@ibdrylist {
         \node[
           node contents={},
           ellipse,
@@ -1905,9 +1937,18 @@ and the derived files            tqft.ins,
 % Same for the outgoing boundary components.
 %    \begin{macrocode}
       \ifnum\tqft@val{outgoing boundary components}>0\relax
+\ifx\tqft@obdrylist\pgfutil@gobble
+\xdef\tqft@obdrylist{1}
+\else
+\xdef\tqft@obdrylist{1,\tqft@obdrylist}
+\fi
+\global\let\tqft@robdrylist=\pgfutil@gobble
+\foreach \k [evaluate=\k as \ok using int(\tqft@val{outgoing boundary components} - \k + 1)] in \tqft@obdrylist {
+  \xdef\tqft@robdrylist{\tqft@robdrylist,\ok}
+}
       \foreach[
-        evaluate=\k as \xpos using (\k-1+\tqft@val{offset})*\tqft@val{boundary                   separation}
-      ] \k in {1,...,\tqft@val{outgoing boundary components}} {
+        evaluate=\k as \xpos using (\k-1+\tqft@val{offset})*\tqft@val{boundary separation}
+      ] \k in \tqft@robdrylist {
           \node[
           node contents={},
           ellipse,
@@ -1931,7 +1972,7 @@ and the derived files            tqft.ins,
 % Now we draw the lower paths of the incoming boundary components.
 %    \begin{macrocode}
       \ifnum\tqft@val{incoming boundary components}>0\relax
-      \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in {1,...,\tqft@val{incoming boundary components}} {
+      \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in \tqft@ibdrylist {
         \path[
           /tikz/tqft/every lower boundary component/.try,
           /tikz/tqft/every incoming lower boundary component/.try,
@@ -1945,7 +1986,7 @@ and the derived files            tqft.ins,
       \ifnum\tqft@val{outgoing boundary components}>0\relax
       \foreach[
         evaluate=\k as \xpos using (\k-1+\tqft@val{offset})*\tqft@val{boundary                   separation}
-      ] \k in {1,...,\tqft@val{outgoing boundary components}} {
+      ] \k in \tqft@robdrylist {
         \path[
           /tikz/tqft/every lower boundary component/.try,
           /tikz/tqft/every outgoing lower boundary component/.try,
@@ -2016,7 +2057,7 @@ and the derived files            tqft.ins,
 % First, incoming.
 %    \begin{macrocode}
       \ifnum\tqft@val{incoming boundary components}>0\relax
-      \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in {1,...,\tqft@val{incoming boundary components}} {
+      \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in \tqft@ibdrylist {
         \path[
           /tikz/tqft/every upper boundary component/.try,
           /tikz/tqft/every incoming upper boundary component/.try,
@@ -2030,7 +2071,7 @@ and the derived files            tqft.ins,
       \ifnum\tqft@val{outgoing boundary components}>0\relax
       \foreach[
         evaluate=\k as \xpos using (\k-1+\tqft@val{offset})*\tqft@val{boundary                   separation}
-      ] \k in {1,...,\tqft@val{outgoing boundary components}} {
+      ] \k in \tqft@robdrylist {
         \path[
           /tikz/tqft/every upper boundary component/.try,
           /tikz/tqft/every outgoing upper boundary component/.try,
