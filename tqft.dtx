@@ -1450,6 +1450,15 @@ and the derived files            tqft.ins,
 %    \begin{macrocode}
       \global\let\tqft@alist\pgfutil@gobble
 %    \end{macrocode}
+% These will be lists of the boundary components, divided into sets as to whether or not they are rendered.  For the outgoing ones, we need too lists because they are rendered in the opposite order to how they are labelled.
+%    \begin{macrocode}
+      \global\let\tqft@ibdrylist=\pgfutil@gobble
+      \global\let\tqft@cibdrylist=\pgfutil@gobble
+      \global\let\tqft@obdrylist=\pgfutil@gobble
+      \global\let\tqft@cobdrylist=\pgfutil@gobble
+      \global\let\tqft@robdrylist=\pgfutil@gobble
+      \global\let\tqft@rcobdrylist=\pgfutil@gobble
+%    \end{macrocode}    
 % The first stage is to iterate over the incoming boundary components (if there are any), building up the various paths.
 %    \begin{macrocode}
       \ifnum\tqft@val{incoming boundary components}>0\relax
@@ -1471,11 +1480,11 @@ and the derived files            tqft.ins,
 % If there are more than one then for each subsequent one we add the curve between them and the corresponding arc of the boundary circle.
 %    \begin{macrocode}
     \ifnum\tqft@val{incoming boundary components}>1\relax
-    \global\let\tqft@ibdrylist=\pgfutil@gobble
     \foreach \k in {2,...,\tqft@val{incoming boundary components}} {
       \edef\tqft@temp{\noexpand\pgfutil@in@{,\k,}{,\tqft@val{skip incoming boundary components},}}
       \tqft@temp
       \ifpgfutil@in@
+      \xdef\tqft@cibdrylist{\tqft@cibdrylist,\k}
       \else
       \xdef\tqft@ibdrylist{\tqft@ibdrylist,\k}
       \fi
@@ -1614,11 +1623,11 @@ and the derived files            tqft.ins,
 %    \end{macrocode}
 % Yes, so add a curve and arc for each.
 %    \begin{macrocode}
-    \global\let\tqft@obdrylist=\pgfutil@gobble
     \foreach \k [evaluate=\k as \ok using int(\tqft@val{outgoing boundary components} - \k + 1)] in {2,...,\tqft@val{outgoing boundary components}} {
       \edef\tqft@temp{\noexpand\pgfutil@in@{,\ok,}{,\tqft@val{skip outgoing boundary components},}}
       \tqft@temp
       \ifpgfutil@in@
+      \xdef\tqft@cobdrylist{\tqft@cobdrylist,\k}
       \else
       \xdef\tqft@obdrylist{\tqft@obdrylist,\k}
       \fi
@@ -1928,6 +1937,24 @@ and the derived files            tqft.ins,
           /tikz/tqft/incoming boundary component \k/.try
         ];
       }%
+\ifx\tqft@cibdrylist\pgfutil@gobble
+\else
+      \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in \tqft@cibdrylist {
+        \node[
+          node contents={},
+          ellipse,
+          inner sep=0pt,
+          outer sep=0pt,
+          minimum width=2*\tqft@val{circle x radius},
+          minimum height=2*\tqft@val{circle y radius},
+          at={(\xpos pt,0)},
+          name=-incoming boundary \k,
+          /tikz/tqft/every skipped boundary component/.try,
+          /tikz/tqft/every skipped incoming boundary component/.try,
+          /tikz/tqft/skipped incoming boundary component \k/.try,
+        ];
+}%
+\fi
 %    \end{macrocode}
 % Add an alias for the first.
 %    \begin{macrocode}
@@ -1942,7 +1969,6 @@ and the derived files            tqft.ins,
 \else
 \xdef\tqft@obdrylist{1,\tqft@obdrylist}
 \fi
-\global\let\tqft@robdrylist=\pgfutil@gobble
 \foreach \k [evaluate=\k as \ok using int(\tqft@val{outgoing boundary components} - \k + 1)] in \tqft@obdrylist {
   \xdef\tqft@robdrylist{\tqft@robdrylist,\ok}
 }
@@ -1962,7 +1988,30 @@ and the derived files            tqft.ins,
           /tikz/tqft/every outgoing boundary component/.try,
           /tikz/tqft/outgoing boundary component \k/.try
         ];
+}%
+\ifx\tqft@cobdrylist\pgfutil@gobble
+\else
+\foreach \k [evaluate=\k as \ok using int(\tqft@val{outgoing boundary components} - \k + 1)] in \tqft@cobdrylist {
+  \xdef\tqft@rcobdrylist{\tqft@rcobdrylist,\ok}
+}
+      \foreach[
+        evaluate=\k as \xpos using (\k-1+\tqft@val{offset})*\tqft@val{boundary separation}
+      ] \k in \tqft@rcobdrylist {
+          \node[
+          node contents={},
+          ellipse,
+          inner sep=0pt,
+          outer sep=0pt,
+          minimum width=2*\tqft@val{circle x radius},
+          minimum height=2*\tqft@val{circle y radius},
+          at={(\xpos pt,-\tqft@val{cobordism height})},
+          name=-outgoing boundary \k,
+          /tikz/tqft/every skipped boundary component/.try,
+          /tikz/tqft/every skipped outgoing boundary component/.try,
+          /tikz/tqft/skipped outgoing boundary component \k/.try
+        ];
       }%
+\fi
 %    \end{macrocode}
 % Add an alias for the first.
 %    \begin{macrocode}

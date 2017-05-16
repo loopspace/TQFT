@@ -9,6 +9,60 @@
 }
 
 \begin{document}
+
+\begin{tikzpicture}[
+  tqft,
+  every outgoing boundary component/.style={fill=blue!50},
+  outgoing boundary component 3/.style={fill=none,draw=red},
+  every incoming boundary component/.style={fill=green!50},
+  every lower boundary component/.style={draw,ultra thick, dashed},
+  every upper boundary component/.style={draw,purple},
+  cobordism/.style={fill=red!50},
+  cobordism edge/.style={draw},
+  view from=incoming,
+  cobordism height=4cm,
+]
+\begin{scope}%[every node/.style={rotate=90}]
+\pic[name=a,
+  tqft,
+  incoming boundary components=3,
+  skip incoming boundary components=2,
+  outgoing boundary components=0
+  ];
+\pic[name=b,
+  tqft,
+  incoming boundary components=3,
+  skip incoming boundary components=2,
+  outgoing boundary components=3,
+  skip outgoing boundary components=2,
+  offset=1,
+  anchor=incoming boundary 1,
+  at=(a-incoming boundary 2)
+];
+\pic[name=c,
+  tqft,
+  incoming boundary components=2,
+  outgoing boundary components=0,
+  anchor={(0,0)},
+  at=(b-incoming boundary 3)
+];
+\pic[name=d,
+  tqft,
+  incoming boundary components=0,
+  outgoing boundary components=4,
+  skip outgoing boundary components=3,
+  at=(a-incoming boundary 1)
+];
+\pic[name=e,
+  tqft,
+  incoming boundary components=0,
+  outgoing boundary components=1,
+  at=(c-incoming boundary 2)
+];
+\end{scope}
+\end{tikzpicture}
+
+\end{document}
 \begin{tikzpicture}[
   tqft,
   every outgoing boundary component/.style={fill=blue!50},
