@@ -38,7 +38,7 @@
 
 
 \title{The \textsf{tqft} Ti\emph{k}Z Library: Documentation}
-\author{Andrew Stacey \\ \url{stacey@math.ntnu.no}}
+\author{Andrew Stacey \\ \url{loopspace@mathforge.org}}
 
 \begin{document}
 
@@ -255,7 +255,11 @@ With no offset (q.v.), this would be the distance between the centres of the fir
 
 \item \DescribeMacro{incoming boundary components} The number of incoming boundary components (can be zero).
 
+\item \DescribeMacro{skip incoming boundary components} A list of incoming boundary components to be skipped.
+
 \item \DescribeMacro{outgoing boundary components} The number of outgoing boundary components (can be zero).
+
+\item \DescribeMacro{skip outgoing boundary components} A list of outgoing boundary components to be skipped.
 
 \item \DescribeMacro{offset} This offsets the first outgoing boundary component horizontally relative to the first incoming boundary component.
 It is a dimensionless number (not necessarily an integer) and is interpreted so that a value of \(1\) aligns the first outgoing boundary component with the second incoming boundary component.
@@ -449,6 +453,7 @@ outgoing boundary 4/below right}
 
 \begin{enumerate}
 \item Like \Verb+node+s, \Verb+pic+s need the \Verb+transform shape+ key to be set to take note of external transformations (other than shifts).
+Also, as the tqft pic uses nodes internally, if you use the \Verb+transform shape+ key on the pic, you might find you need to use \Verb+every node/.style={transform shape}+ as well.
 \item There is an additional \Verb+every tqft+ key which is run when the \Verb+tqft+ key is invoked (which might be via some other key).
 This is better placed than the \Verb+every pic+ key since that applies to a surrounding scope rather than to the \Verb+pic+ itself.
 \item If the \Verb+tqft+ key is invoked, either implicitly or explicitly, then the \Verb+pic type+ is set to \Verb+cobordism+.
@@ -504,6 +509,43 @@ Use \Verb+transform shape+ and apply your own transformation.
 \pic[draw,tqft/cup,anchor=incoming boundary 1,at=(a-outgoing boundary 2)];
 \end{scope}
 }
+\end{tikzpicture}
+\end{example}
+
+\begin{example}
+\begin{tikzpicture}[
+  tqft,
+  every outgoing boundary component/.style={fill=blue!50},
+  outgoing boundary component 3/.style={fill=none,draw=red},
+  every incoming boundary component/.style={fill=green!50},
+  every lower boundary component/.style={draw,ultra thick, dashed},
+  every upper boundary component/.style={draw,purple},
+  cobordism/.style={fill=red!50},
+  cobordism edge/.style={draw},
+  genus=3,
+  hole 2/.style={ultra thick, blue},
+  view from=incoming,
+  anchor=between incoming 1 and 2
+]
+\pic[rotate=90,every node/.style={transform shape},name=a,tqft,incoming boundary components=5,skip incoming boundary components={2,4},outgoing boundary components=7,skip outgoing boundary components={2,3,5},offset=-.5];
+
+\begin{scope}[every pin edge/.style={<-}]
+\foreach \anchor/\ang in {
+  hole 1/-90,
+  hole 2/90,
+  hole 3/-90,
+  incoming boundary 3/90,
+  outgoing boundary 4/-90,
+  between last incoming and last outgoing/180,
+  between first incoming and first outgoing/180,
+  between incoming 1 and 3/90,
+  between outgoing 1 and 4/-90,
+  between outgoing 4 and 6/-90
+} {
+  \node[pin=\ang:\anchor,at=(a-\anchor),inner sep=0pt] {};
+}
+\draw[<-] (0,0) -- ++(0,3);
+\end{scope}
 \end{tikzpicture}
 \end{example}
 
