@@ -26,7 +26,7 @@ This package defines some shapes useful for drawing TQFT diagrams with TikZ/PGF.
 \preamble
 ----------------------------------------------------------------
 tqft --- a library for drawing TQFT diagrams with TikZ/PGF
-E-mail: stacey@math.ntnu.no
+E-mail: loopspace@mathforge.org
 Released under the LaTeX Project Public License v1.3c or later
 See http://www.latex-project.org/lppl.txt
 ----------------------------------------------------------------
@@ -34,7 +34,7 @@ See http://www.latex-project.org/lppl.txt
 \endpreamble
 \postamble
 
-Copyright (C) 2011 by Andrew Stacey <stacey@math.ntnu.no>
+Copyright (C) 2011 by Andrew Stacey <loopspace@mathforge.org>
 
 This work may be distributed and/or modified under the
 conditions of the LaTeX Project Public License (LPPL), either
@@ -83,7 +83,7 @@ and the derived files            tqft.ins,
 %</internal>
 %<*package>
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{tqft}[2014/04/07 v2.0 Tikz/PGF commands for drawing TQFT diagrams]
+\ProvidesPackage{tqft}[2017/06/01 v2.1 Tikz/PGF commands for drawing TQFT diagrams]
 %</package>
 %<*driver>
 \documentclass{ltxdoc}
@@ -109,7 +109,7 @@ and the derived files            tqft.ins,
 %</driver>
 % \fi
 %
-% \CheckSum{2418}
+% \CheckSum{2577}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -130,13 +130,14 @@ and the derived files            tqft.ins,
 %
 % \changes{1.0}{2011/05/03}{Converted to DTX file}
 % \changes{2.0}{2014/04/07}{Converted nodes to pics}
+% \changes{2.1}{2017/06/01}{Can skip boundary components}
 %
 % \DoNotIndex{\newcommand,\newenvironment}
 %
 % \providecommand*{\url}{\texttt}
 % \GetFileInfo{tqft.dtx}
 % \title{The \textsf{tqft} package: codebase}
-% \author{Andrew Stacey \\ \url{stacey@math.ntnu.no}}
+% \author{Andrew Stacey \\ \url{loopspace@mathforge.org}}
 %
 % \maketitle
 %
@@ -1570,7 +1571,7 @@ and the derived files            tqft.ins,
 % Same for the edge path.
 %    \begin{macrocode}
       \xdef\tqft@blist{%
-        \tqft@blist,between first incoming and last incoming/incoming and outgoing/{%
+        \tqft@blist,between first and last incoming/incoming and outgoing/{%
         (\tqft@val{incoming boundary components} * \tqft@val{boundary separation} + \tqft@val{circle x radius} - \tqft@val{boundary separation},0pt)
         .. controls +(0,-\tqft@ht*\tqft@val{cobordism height}) and +(0,-\tqft@ht*\tqft@val{cobordism height}) .. (-\tqft@val{circle x radius},0)}
       }%
@@ -1579,7 +1580,7 @@ and the derived files            tqft.ins,
 %    \begin{macrocode}
       \pgfmathsetmacro\xppos{(\tqft@val{incoming boundary components} -1) * \tqft@val{boundary separation}/2}%
       \xdef\tqft@clist{%
-        \tqft@clist,-between first incoming and last incoming/{(\xppos pt,-\tqft@ht*\tqft@val{cobordism height}*3/4)}%
+        \tqft@clist,-between first and last incoming/{(\xppos pt,-\tqft@ht*\tqft@val{cobordism height}*3/4)}%
       }%
       \fi
       \else
