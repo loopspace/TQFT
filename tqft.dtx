@@ -1924,7 +1924,8 @@ and the derived files            tqft.ins,
 \xdef\tqft@ibdrylist{1,\tqft@ibdrylist}
 \fi
       \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in \tqft@ibdrylist {
-        \node[
+  \node[
+    transform shape,
           node contents={},
           ellipse,
           inner sep=0pt,
@@ -1941,7 +1942,8 @@ and the derived files            tqft.ins,
 \ifx\tqft@cibdrylist\pgfutil@gobble
 \else
       \foreach[evaluate=\k as \xpos using (\k-1)*\tqft@val{boundary separation}] \k in \tqft@cibdrylist {
-        \node[
+  \node[
+    transform shape,
           node contents={},
           ellipse,
           inner sep=0pt,
@@ -1976,7 +1978,8 @@ and the derived files            tqft.ins,
       \foreach[
         evaluate=\k as \xpos using (\k-1+\tqft@val{offset})*\tqft@val{boundary separation}
       ] \k in \tqft@robdrylist {
-          \node[
+  \node[
+    transform shape,
           node contents={},
           ellipse,
           inner sep=0pt,
@@ -1998,7 +2001,8 @@ and the derived files            tqft.ins,
       \foreach[
         evaluate=\k as \xpos using (\k-1+\tqft@val{offset})*\tqft@val{boundary separation}
       ] \k in \tqft@rcobdrylist {
-          \node[
+  \node[
+    transform shape,
           node contents={},
           ellipse,
           inner sep=0pt,
