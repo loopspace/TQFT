@@ -1268,6 +1268,10 @@ and the derived files            tqft.ins,
 \let\pgf@tqft@upper\@empty
 \let\pgf@tqft@lower\pgf@tqft@minus
 %    \end{macrocode}
+% Should we twist the cobordism?
+%    \begin{macrocode}
+\newif\iftqft@twisted
+%    \end{macrocode}
 % Split an anchoring coordinate.
 % The \(y\)--value is simply multiplied by the cobordism height (but pointing downwards, so that \(1\) is level with the outgoing boundary).
 % The \(x\)--value is multiplied by the boundary separation, but is shifted so that at the incoming boundary level, or above, then it is in line with the incoming boundaries and similarly at the outgoing boundary level, or below, it is in line with the outgoing boundaries.
@@ -1347,6 +1351,10 @@ and the derived files            tqft.ins,
     \let\pgf@tqft@upper\@empty
   },
 %    \end{macrocode}
+% Should we twist the cobordism?
+%    \begin{macrocode}
+  twisted/.is if=tqft@twisted,
+%    \end{macrocode}  
 % We simulate node placement using the following key.
 %    \begin{macrocode}
   anchor/.initial = none,
@@ -1451,7 +1459,7 @@ and the derived files            tqft.ins,
 %    \begin{macrocode}
       \global\let\tqft@alist\pgfutil@gobble
 %    \end{macrocode}
-% These will be lists of the boundary components, divided into sets as to whether or not they are rendered.  For the outgoing ones, we need too lists because they are rendered in the opposite order to how they are labelled.
+% These will be lists of the boundary components, divided into sets as to whether or not they are rendered.  For the outgoing ones, we need two lists because they are rendered in the opposite order to how they are labelled.
 %    \begin{macrocode}
       \global\let\tqft@ibdrylist=\pgfutil@gobble
       \global\let\tqft@cibdrylist=\pgfutil@gobble
@@ -1460,6 +1468,17 @@ and the derived files            tqft.ins,
       \global\let\tqft@robdrylist=\pgfutil@gobble
       \global\let\tqft@rcobdrylist=\pgfutil@gobble
 %    \end{macrocode}    
+% Is the cobordism twisted?  If so, we need to reverse the order of the
+% outgoing boundary components.    
+%    \begin{macrocode}
+    \iftqft@twisted
+    \pgfmathsetmacro\tqft@outgoing@end{0}%
+    \pgfmathsetmacro\tqft@outgoing@dir{-1}%
+    \else
+    \pgfmathsetmacro\tqft@outgoing@end{1}%
+    \pgfmathsetmacro\tqft@outgoing@dir{1}%
+    \fi
+%    \end{macrocode}
 % The first stage is to iterate over the incoming boundary components (if there are any), building up the various paths.
 %    \begin{macrocode}
       \ifnum\tqft@val{incoming boundary components}>0\relax
@@ -1533,9 +1552,14 @@ and the derived files            tqft.ins,
 %    \begin{macrocode}
       \ifnum\tqft@val{outgoing boundary components}>0\relax
 %    \end{macrocode}
-% There are, so we add a curve from the end of the last incoming to the last outgoing component to the full path,
+% There are.
+%
+% We start by adding a curve from the end of the last incoming to the last outgoing component to the full path,
 %    \begin{macrocode}
-        \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components} -1+\tqft@val{offset}) * \tqft@val{boundary separation} +\tqft@val{circle x radius}}%
+    \pgfmathsetmacro\xppos{%
+      (\tqft@outgoing@end * (\tqft@val{outgoing boundary components} -1)
+      + \tqft@val{offset}) * \tqft@val{boundary separation}
+      + \tqft@outgoing@dir * \tqft@val{circle x radius}}%
       \pgfmathsetmacro\tqft@ht{abs(\tqft@val{incoming boundary components} - \tqft@val{outgoing boundary components} - \tqft@val{offset})}%
       \pgfmathsetmacro\tqft@ht{1/3 + 2/3*\tqft@ht/(\tqft@ht + 1)}%
       \xdef\tqft@fullpath{%
@@ -1588,7 +1612,7 @@ and the derived files            tqft.ins,
 % There weren't any incoming boundary components, so we test to see if there were any outgoing ones and move to the start of them.
 %    \begin{macrocode}
       \ifnum\tqft@val{outgoing boundary components}>0\relax
-        \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components} -1+\tqft@val{offset}) * \tqft@val{boundary separation} +\tqft@val{circle x radius}}
+        \pgfmathsetmacro\xppos{( \tqft@outgoing@end * (\tqft@val{outgoing boundary components} -1)+\tqft@val{offset}) * \tqft@val{boundary separation} + \tqft@outgoing@dir * \tqft@val{circle x radius}}
 %    \end{macrocode}
 % Add a move to the full path,
 %    \begin{macrocode}
@@ -1600,22 +1624,25 @@ and the derived files            tqft.ins,
       \fi
 %    \end{macrocode}
 % We're done with the incoming boundary components, now we're set up for the outgoing ones.
-% However we got there, if we have outgoing boundary components then we're now located at the start of them, although we're counting backwards.
+% However we got there, if we have outgoing boundary components then we're now located at the start of them, although we might be counting backwards .
 %    \begin{macrocode}
-      \ifnum\tqft@val{outgoing boundary components}>0\relax
-      \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components} -1+\tqft@val{offset}) * \tqft@val{boundary separation} -\tqft@val{circle x radius}}%
+    \ifnum\tqft@val{outgoing boundary components}>0\relax
+    \pgfmathsetmacro\xppos{%
+      ( \tqft@outgoing@end * (\tqft@val{outgoing boundary components} -1)
+      + \tqft@val{offset}) * \tqft@val{boundary separation}
+      - \tqft@outgoing@dir * \tqft@val{circle x radius}}%
 %    \end{macrocode}
 % Draw the arc for the first (well, last actually) boundary component.
 %    \begin{macrocode}
       \xdef\tqft@fullpath{%
         \tqft@fullpath
-        arc[end angle=\pgf@tqft@upper180, start angle=0, x radius=\tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
+        arc[end angle=\pgf@tqft@upper180, start angle=0, x radius=\tqft@outgoing@dir * \tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
       }%
 %    \end{macrocode}
 % And add the centre to the list for available shifts.
 %    \begin{macrocode}
       \xdef\tqft@alist{%
-        \tqft@alist,-outgoing boundary \tqft@val{outgoing boundary components}/{(\xppos pt + \tqft@val{circle x radius},-\tqft@val{cobordism height})},-outgoing boundary/{(\tqft@val{offset}*\tqft@val{boundary separation},-\tqft@val{cobordism height})}%
+        \tqft@alist,-outgoing boundary \tqft@val{outgoing boundary components}/{(\xppos pt + \tqft@outgoing@dir * \tqft@val{circle x radius},-\tqft@val{cobordism height})},-outgoing boundary/{(\tqft@val{offset}*\tqft@val{boundary separation},-\tqft@val{cobordism height})}%
       }%
 %    \end{macrocode}
 % Do we have more than one boundary component?
@@ -1624,7 +1651,7 @@ and the derived files            tqft.ins,
 %    \end{macrocode}
 % Yes, so add a curve and arc for each.
 %    \begin{macrocode}
-    \foreach \k [evaluate=\k as \ok using int(\tqft@val{outgoing boundary components} - \k + 1)] in {2,...,\tqft@val{outgoing boundary components}} {
+    \foreach \k [evaluate=\k as \ok using int(\tqft@outgoing@end * (\tqft@val{outgoing boundary components} + 1) - \tqft@outgoing@dir * \k)] in {2,...,\tqft@val{outgoing boundary components}} {
       \edef\tqft@temp{\noexpand\pgfutil@in@{,\ok,}{,\tqft@val{skip outgoing boundary components},}}
       \tqft@temp
       \ifpgfutil@in@
@@ -1637,9 +1664,9 @@ and the derived files            tqft.ins,
     \else
     \foreach \k [
       remember=\k as \kmo (initially 1),
-        evaluate=\k as \xpos using (\tqft@val{outgoing boundary components} - \k + \tqft@val{offset})*\tqft@val{boundary separation} + \tqft@val{circle x radius},
+        evaluate=\k as \xpos using ( \tqft@outgoing@end * (\tqft@val{outgoing boundary components} + 1) - 1 -  \tqft@outgoing@dir * \k + \tqft@val{offset})*\tqft@val{boundary separation} + \tqft@outgoing@dir * \tqft@val{circle x radius},
     ] in \tqft@obdrylist {
-      \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components} - \kmo + \tqft@val{offset})*\tqft@val{boundary separation} - \tqft@val{circle x radius}}
+      \pgfmathsetmacro\xppos{(\tqft@outgoing@end * (\tqft@val{outgoing boundary components} + 1) - 1 - \tqft@outgoing@dir * \kmo + \tqft@val{offset})*\tqft@val{boundary separation} - \tqft@outgoing@dir * \tqft@val{circle x radius}}
         \pgfmathsetmacro\cpos{(\xpos + \xppos)/2}
         \pgfmathsetmacro\nk{int(\tqft@val{outgoing boundary components} - \k + 1)}
         \pgfmathsetmacro\nkpo{int(\tqft@val{outgoing boundary components} - \kmo + 1)}
@@ -1648,7 +1675,7 @@ and the derived files            tqft.ins,
 %    \begin{macrocode}
         \xdef\tqft@fullpath{%
           \tqft@fullpath
-           .. controls +(0,\tqft@val{cobordism height}/3) and +(0,\tqft@val{cobordism height}/3) ..  (\xpos pt,-\tqft@val{cobordism height}) arc[end angle=\pgf@tqft@upper180, start angle=0, x radius=\tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
+           .. controls +(0,\tqft@val{cobordism height}/3) and +(0,\tqft@val{cobordism height}/3) ..  (\xpos pt,-\tqft@val{cobordism height}) arc[end angle=\pgf@tqft@upper180, start angle=0, x radius=\tqft@outgoing@dir * \tqft@val{circle x radius}, y radius=\tqft@val{circle y radius}]
       }%
 %    \end{macrocode}
 % Just the arc for the edge paths.
@@ -1691,14 +1718,14 @@ and the derived files            tqft.ins,
 %    \begin{macrocode}
       \xdef\tqft@blist{%
         \tqft@blist,between first incoming and first outgoing/incoming and outgoing/{%
-    (\tqft@val{offset} * \tqft@val{boundary separation} - \tqft@val{circle x radius},-\tqft@val{cobordism height})
+    ({ ( (1 - \tqft@outgoing@end) * (\tqft@val{outgoing boundary components} - 1) + \tqft@val{offset}) * \tqft@val{boundary separation} - \tqft@outgoing@dir * \tqft@val{circle x radius}},-\tqft@val{cobordism height})
         .. controls +(0,\tqft@ht*\tqft@val{cobordism height}) and +(0,-\tqft@ht*\tqft@val{cobordism height}) .. (-\tqft@val{circle x radius},0)}%
       }%
 %    \end{macrocode}
 % Add a coordinate at the midpoint.
 %    \begin{macrocode}
       \xdef\tqft@clist{%
-        \tqft@clist,-between first incoming and first outgoing/{(\tqft@val{offset}*\tqft@val{boundary separation}/2-\tqft@val{circle x radius},-\tqft@val{cobordism height}/2)}%
+        \tqft@clist,-between first incoming and first outgoing/{({ ( (1 - \tqft@outgoing@end) * (\tqft@val{outgoing boundary components} - 1) +\tqft@val{offset})*\tqft@val{boundary separation}/2- \tqft@outgoing@end * \tqft@val{circle x radius}},-\tqft@val{cobordism height}/2)}%
       }%
       \else
 %    \end{macrocode}
@@ -1972,7 +1999,7 @@ and the derived files            tqft.ins,
 \else
 \xdef\tqft@obdrylist{1,\tqft@obdrylist}
 \fi
-\foreach \k [evaluate=\k as \ok using int(\tqft@val{outgoing boundary components} - \k + 1)] in \tqft@obdrylist {
+\foreach \k [evaluate=\k as \ok using int(\tqft@outgoing@end * (\tqft@val{outgoing boundary components} + 1) - \tqft@outgoing@dir * \k)] in \tqft@obdrylist {
   \xdef\tqft@robdrylist{\tqft@robdrylist,\ok}
 }
       \foreach[
@@ -1995,7 +2022,8 @@ and the derived files            tqft.ins,
 }%
 \ifx\tqft@cobdrylist\pgfutil@gobble
 \else
-\foreach \k [evaluate=\k as \ok using int(\tqft@val{outgoing boundary components} - \k + 1)] in \tqft@cobdrylist {
+\foreach \k[evaluate=\k as \ok using int(\tqft@outgoing@end * (\tqft@val{outgoing boundary components} + 1) - \tqft@outgoing@dir * \k)]
+ in \tqft@cobdrylist {
   \xdef\tqft@rcobdrylist{\tqft@rcobdrylist,\ok}
 }
       \foreach[
