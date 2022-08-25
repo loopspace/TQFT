@@ -35,10 +35,15 @@
 
 \providecommand*{\url}{\texttt}
 \GetFileInfo{tqft.sty}
+\pdfstringdefDisableCommands{%
+  \def\\{}%
+  \def\url#1{<#1>}%
+}
 
 
 \title{The \textsf{tqft} Ti\emph{k}Z Library: Documentation}
 \author{Andrew Stacey \\ \url{loopspace@mathforge.org}}
+\date{\fileversion~from \filedate}
 
 \begin{document}
 
@@ -485,15 +490,13 @@ Use \Verb+transform shape+ and apply your own transformation.
 {(0,-8)}/{fill=orange,fill opacity=.5,tqft/every lower boundary component/.style={draw,blue,ultra thin,dashed},tqft/every upper boundary component/.style={draw,green},tqft/cobordism edge/.style={draw,purple},tqft/every boundary component/.style={fill=yellow}},
 {(5,-8)}/{fill=orange,fill opacity=.5,tqft/cobordism edge/.style={draw,purple},tqft/every boundary component/.style={fill=yellow,draw=green}}
 } {
-\begin{scope}
-\edef\styleit{\noexpand\tikzset{every tqft/.style={\style}}}
-\styleit
+  \begin{scope}[every tqft/.style/.expand once=\style]
 \pic[tqft/cap,name=h,at=\coord];
 \pic[tqft/pair of pants,anchor=incoming boundary 1,name=a,at=(h-outgoing boundary 1)];
 \pic[tqft/cylinder to next,anchor={(0,1)},name=d,at=(a-outgoing boundary 2)];
 \pic[tqft/reverse pair of pants,anchor=incoming boundary 1,name=b,at=(a-outgoing boundary 2)];
 \pic[tqft/cylinder to prior,anchor=incoming boundary 1,name=c,at=(b-outgoing boundary 1)];
-\pic[tqft/cylinder,anchor=incoming boundary 1,name=e,at=(a-outgoing  boundary 1)];
+\pic[tqft/cylinder,twisted,anchor=incoming boundary 1,name=e,at=(a-outgoing  boundary 1)];
 \pic[tqft/cylinder,anchor=incoming boundary 1,name=f,at=(e-outgoing  boundary 1)];
 \pic[tqft/reverse pair of pants,anchor=incoming boundary 1,name=g,at=(f-outgoing boundary 1)];
 \pic[tqft/cup,anchor=incoming boundary 1,name=i,at=(g-outgoing boundary 1)];
@@ -943,9 +946,7 @@ This shouldn't happen, or should happen by design not by accident.
 {(0,-8)}/{fill=orange,fill opacity=.5,tqft/boundary lower  style={draw,blue,ultra thin,dashed},tqft/boundary upper  style={draw,green},tqft/cobordism style={draw,purple},tqft/boundary  style={fill=yellow}},
 {(5,-8)}/{fill=orange,fill opacity=.5,tqft/cobordism  style={draw,purple},tqft/boundary style={fill=yellow,draw=green}}
 } {
-\begin{scope}
-\edef\styleit{\noexpand\tikzset{every node/.style={\style}}}
-\styleit
+\begin{scope}[every node/.style/.expand once=\style]
 \node[tqft/cap] (h) at \coord {};
 \node[tqft/pair of pants,anchor=incoming boundary 1] (a) at  (h.outgoing boundary 1) {};
 \node[tqft/cylinder to next,anchor=incoming boundary 1] (d) at  (a.incoming boundary 2) {};

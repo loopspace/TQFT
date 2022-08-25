@@ -34,7 +34,7 @@ See http://www.latex-project.org/lppl.txt
 \endpreamble
 \postamble
 
-Copyright (C) 2011 by Andrew Stacey <loopspace@mathforge.org>
+Copyright (C) 2011-2022 by Andrew Stacey <loopspace@mathforge.org>
 
 This work may be distributed and/or modified under the
 conditions of the LaTeX Project Public License (LPPL), either
@@ -83,7 +83,7 @@ and the derived files            tqft.ins,
 %</internal>
 %<*package>
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{tqft}[2017/06/01 v2.1 Tikz/PGF commands for drawing TQFT diagrams]
+\ProvidesPackage{tqft}[2011/09/14 v1.0 Tikz/PGF commands for drawing TQFT diagrams]
 %</package>
 %<*driver>
 \documentclass{ltxdoc}
@@ -109,7 +109,7 @@ and the derived files            tqft.ins,
 %</driver>
 % \fi
 %
-% \CheckSum{2577}
+% \CheckSum{2617}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -131,13 +131,19 @@ and the derived files            tqft.ins,
 % \changes{1.0}{2011/05/03}{Converted to DTX file}
 % \changes{2.0}{2014/04/07}{Converted nodes to pics}
 % \changes{2.1}{2017/06/01}{Can skip boundary components}
+% \changes{2.2}{2022/08/24}{Twisted shapes}
 %
 % \DoNotIndex{\newcommand,\newenvironment}
+% \pdfstringdefDisableCommands{%
+%  \def\\{}%
+%  \def\url#1{<#1>}%
+% }
 %
 % \providecommand*{\url}{\texttt}
-% \GetFileInfo{tqft.dtx}
+% \GetFileInfo{tikzlibrarytqft.code.tex}
 % \title{The \textsf{tqft} package: codebase}
 % \author{Andrew Stacey \\ \url{loopspace@mathforge.org}}
+% \date{\fileversion~from \filedate}
 %
 % \maketitle
 %
@@ -1247,6 +1253,7 @@ and the derived files            tqft.ins,
 %
 % \iffalse
 %<*library>
+\ProvidesFile{tikzlibrarytqft.code.tex}[2022/08/24 v2.2 Tikz/PGF commands for drawing TQFT diagrams]
 % \fi
 %
 % Issue a warning if the pic syntax is not available.
