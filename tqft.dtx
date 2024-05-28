@@ -109,7 +109,7 @@ and the derived files            tqft.ins,
 %</driver>
 % \fi
 %
-% \CheckSum{2617}
+% \CheckSum{2623}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -1611,7 +1611,7 @@ and the derived files            tqft.ins,
 %    \begin{macrocode}
       \pgfmathsetmacro\xppos{(\tqft@val{incoming boundary components} -1) * \tqft@val{boundary separation}/2}%
       \xdef\tqft@clist{%
-        \tqft@clist,-between first and last incoming/{(\xppos pt,-\tqft@ht*\tqft@val{cobordism height}*3/4)}%
+        \tqft@clist,-between first and last incoming/{(\xppos pt,-\tqft@ht*\tqft@val{cobordism height}*3/4)},-between first incoming and last incoming/{(\xppos pt,-\tqft@ht*\tqft@val{cobordism height}*3/4)}%
       }%
       \fi
       \else
@@ -1761,7 +1761,7 @@ and the derived files            tqft.ins,
       \pgfmathsetmacro\xppos{(\tqft@val{outgoing boundary components}/2 + \tqft@val{offset} -1/2) * \tqft@val{boundary separation}}%
       \pgfmathsetmacro\tqft@ht{1 -\tqft@ht*3/4}%
       \xdef\tqft@clist{%
-        \tqft@clist,-between first and last outgoing/{(\xppos pt,-\tqft@ht*\tqft@val{cobordism height})}%
+        \tqft@clist,-between first and last outgoing/{(\xppos pt,-\tqft@ht*\tqft@val{cobordism height})},-between first outgoing and last outgoing/{(\xppos pt,-\tqft@ht*\tqft@val{cobordism height})}%
       }%
       \fi
       \fi
