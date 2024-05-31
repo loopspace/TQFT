@@ -345,7 +345,6 @@ The latter is for the two sides, but note that if the cobordism has no incoming 
 \item \Verb=between incoming <n> and <n+1>=,
 \item \Verb=between outgoing <n> and <n+1>=,
 \item \Verb+between first incoming and first outgoing+,
-\item \Verb+between first incoming and first outgoing+,
 \item \Verb+between last incoming and last outgoing+,
 \item \Verb+between first and last incoming+,
 \item \Verb+between first and last outgoing+.
@@ -426,7 +425,11 @@ They are:
 \item \Verb=between first incoming and first outgoing= is on the edge between the first incoming and first outgoing boundary components; note that this is only defined if there are both incoming and outgoing boundary components.
 \item \Verb=between last incoming and last outgoing= is on the edge between the last incoming and last outgoing boundary components; note that this is only defined if there are both incoming and outgoing boundary components.
 \item \Verb=between first and last incoming=; this is only defined if there are no outgoing components.
+
+This is aliased to \Verb=between first incoming and last incoming=.
 \item \Verb=between first and last outgoing=; this is only defined if there are no incoming components.
+
+This is aliased to \Verb=between first outgoing and last outgoing=.
 \item \Verb=hole <n>=; if the genus is non-zero, this points to the centre of the \(n\)th hole.
 \end{itemize}
 
