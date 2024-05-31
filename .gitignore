@@ -8,3 +8,7 @@
 *.idx
 *.ins
 *.out
+*.sty
+CTAN
+README.txt
+tikzlibrarytqft.code.tex
