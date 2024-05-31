@@ -1,0 +1,21 @@
+\documentclass{article}
+
+\usepackage{tikz}
+
+\tikzset{
+  test/.pic={
+    code={
+      \draw[line width=1mm,cyan] (0,0) rectangle (1,1);
+      \node[circle,draw,transform shape] at (.5,.5) {Node};
+    }
+  }
+}
+
+\begin{document}
+
+\begin{tikzpicture}[rotate=45]
+\pic at (3,3) {test};
+\pic[scale=2,transform shape] {test};
+\pic[scale=2] at (5,0) {test};
+\end{tikzpicture}
+\end{document}

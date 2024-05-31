@@ -1,4 +1,4 @@
-\immediate\write18{tex tqft.dtx}
+%\immediate\write18{tex ../tqft.dtx}
 \documentclass{article}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric,tqft}
@@ -113,7 +113,7 @@
 \end{scope}
 \end{tikzpicture}
 
-\end{document}
+%\end{document}
 \begin{tikzpicture}[
   tqft,
   every outgoing boundary component/.style={fill=blue!50},
@@ -150,7 +150,7 @@
 \draw[<-] (0,0) -- ++(0,3);
 \end{scope}
 \end{tikzpicture}
-\end{document}
+%\end{document}
 
 \begin{tikzpicture}
 \pic[
@@ -419,12 +419,14 @@
 \foreach \anchor/\ang in {
   hole 1/-90,
   incoming boundary 2/90,
-  between first incoming and last incoming/-90
+  between first incoming and last incoming/-90,
+  between first and last incoming/-90
 } {
   \node[pin=\ang:\anchor,at=(a-\anchor)] {};
 }
 \end{scope}
 \end{tikzpicture}
+
 
 \begin{tikzpicture}[
   tqft,
@@ -443,7 +445,8 @@
   outgoing boundary 3/-90,
   between outgoing 1 and 2/-90,
   between outgoing 2 and 3/-90,
-  between first and last outgoing/90
+  between first and last outgoing/90,
+  between first outgoing and last outgoing/90
 } {
   \node[pin=\ang:\anchor,at=(a-\anchor),inner sep=0pt] {};
 }
