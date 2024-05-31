@@ -50,29 +50,29 @@ http://www.latex-project.org/lppl.txt
 This work is "maintained" (as per LPPL maintenance status) by
 Andrew Stacey.
 
-This work consists of the files  tqft.dtx,
-                                 tqft_doc.tex,
+This work consists of the files  tqft_code.dtx,
+                                 tqft.tex,
 and the derived files            tqft.ins,
+                                 tqft_code.pdf,
                                  tqft.pdf,
-                                 tqft_doc.pdf,
                                  tqft.sty, and
                                  tikzlibrarytqft.code.tex.
 
 \endpostamble
 \usedir{tex/latex/tqft}
 \generate{
-  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
+  \file{tqft.sty}{\from{\jobname.dtx}{package}}
 }
 \usedir{tex/latex/tqft}
 \generate{
-  \file{tikzlibrary\jobname.code.tex}{\from{\jobname.dtx}{library}}
+  \file{tikzlibrarytqft.code.tex}{\from{\jobname.dtx}{library}}
 }
 %</install>
 %<install>\endbatchfile
 %<*internal>
 \usedir{source/latex/tqft}
 \generate{
-  \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+  \file{tqft.ins}{\from{\jobname.dtx}{install}}
 }
 \nopreamble\nopostamble
 \usedir{doc/latex/demopkg}
@@ -95,7 +95,7 @@ and the derived files            tqft.ins,
 \usepackage{lmodern}
 %\usepackage{morefloats}
 \usepackage{tikz}
-\usepackage{\jobname}
+\usepackage{tqft}
 \usepackage[numbered]{hypdoc}
 \definecolor{lstbgcolor}{rgb}{0.9,0.9,0.9} 
  
