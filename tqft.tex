@@ -34,7 +34,7 @@
 }
 
 \providecommand*{\url}{\texttt}
-\GetFileInfo{tqft.sty}
+\GetFileInfo{tikzlibrarytqft.code.tex}
 \pdfstringdefDisableCommands{%
   \def\\{}%
   \def\url#1{<#1>}%
@@ -156,7 +156,7 @@ The second version is designed to be similar to the first, but with some improve
 The original version was distributed as a \Verb+.sty+ file and so is loaded using \Verb+\usepackage{tqft}+.
 The newer version is a Ti\emph{k}Z library and so is loaded using \Verb+\usetikzlibrary{tqft}+.
 This makes it possible to use both in the same document.
-This is not recommended, but an attempt has been made to make it possible to switch between the two methods.
+This is not recommended, but an attempt has been made to make it possible to switch between the two methods (mainly to stop this documentation file complaining every time I compile it).
 This hasn't been extensively tested so use with caution.
 To make the switch use the key \Verb+/tikz/tqft/use nodes=<true|false>+.
 By default, the one loaded last should be in effect at the start of the document.
@@ -175,7 +175,8 @@ Moreover, any unknown keys are passed on to the \Verb+/tikz+ directory so there 
 Some examples take advantage of this switch so when copying and modifying examples from this document, it is important to remember that the first \Verb+tqft+ specific key needs an explicit \Verb+tqft/+ prefix.
 
 
-\section{Version 2.0}
+\section{Version 2: Pics via a TikZ Library}
+\label{sec:pic}
 
 \subsection{The Shapes}
 
@@ -426,10 +427,10 @@ They are:
 \item \Verb=between last incoming and last outgoing= is on the edge between the last incoming and last outgoing boundary components; note that this is only defined if there are both incoming and outgoing boundary components.
 \item \Verb=between first and last incoming=; this is only defined if there are no outgoing components.
 
-This is aliased to \Verb=between first incoming and last incoming=.
+This is also available via the alias \Verb=between first incoming and last incoming=.
 \item \Verb=between first and last outgoing=; this is only defined if there are no incoming components.
 
-This is aliased to \Verb=between first outgoing and last outgoing=.
+This is also available via the alias \Verb=between first outgoing and last outgoing=.
 \item \Verb=hole <n>=; if the genus is non-zero, this points to the centre of the \(n\)th hole.
 \end{itemize}
 
@@ -464,7 +465,7 @@ outgoing boundary 4/below right}
 
 \begin{enumerate}
 \item Like \Verb+node+s, \Verb+pic+s need the \Verb+transform shape+ key to be set to take note of external transformations (other than shifts).
-Also, as the tqft pic uses nodes internally, if you use the \Verb+transform shape+ key on the pic, you might find you need to use \Verb+every node/.style={transform shape}+ as well.
+The tqft pic uses nodes internally and those nodes have \Verb+transform shape+ automatically set so this should \emph{just work}.
 \item There is an additional \Verb+every tqft+ key which is run when the \Verb+tqft+ key is invoked (which might be via some other key).
 This is better placed than the \Verb+every pic+ key since that applies to a surrounding scope rather than to the \Verb+pic+ itself.
 \item If the \Verb+tqft+ key is invoked, either implicitly or explicitly, then the \Verb+pic type+ is set to \Verb+cobordism+.
@@ -536,24 +537,26 @@ Use \Verb+transform shape+ and apply your own transformation.
   view from=incoming,
   anchor=between incoming 1 and 2
 ]
-\pic[rotate=90,every node/.style={transform shape},name=a,tqft,incoming boundary components=5,skip incoming boundary components={2,4},outgoing boundary components=7,skip outgoing boundary components={2,3,5},offset=-.5];
+\pic[rotate=90,
+  %every node/.style={transform shape},
+  name=a,tqft,incoming boundary components=5,skip incoming boundary components={2,4},outgoing boundary components=7,skip outgoing boundary components={2,3,5},offset=-.5];
 
 \begin{scope}[every pin edge/.style={<-}]
 \foreach \anchor/\ang in {
   hole 1/-90,
   hole 2/90,
   hole 3/-90,
-  incoming boundary 3/90,
-  outgoing boundary 4/-90,
-  between last incoming and last outgoing/180,
-  between first incoming and first outgoing/180,
-  between incoming 1 and 3/90,
-  between outgoing 1 and 4/-90,
-  between outgoing 4 and 6/-90
+  incoming boundary 3/180,
+  outgoing boundary 4/0,
+  between last incoming and last outgoing/90,
+  between first incoming and first outgoing/-90,
+  between incoming 1 and 3/180,
+  between outgoing 1 and 4/0,
+  between outgoing 4 and 6/0
 } {
   \node[pin=\ang:\anchor,at=(a-\anchor),inner sep=0pt] {};
 }
-\draw[<-] (0,0) -- ++(0,3);
+\draw[<-] (0,0) -- ++(-2,0) node[left] {origin};
 \end{scope}
 \end{tikzpicture}
 \end{example}
@@ -706,9 +709,12 @@ Use \Verb+transform shape+ and apply your own transformation.
 \end{tikzpicture}
 %\end{example}
 
-\section{Version 1.0}
+\section{Version 1: Nodes via a Style File}
 
 \tikzset{tqft/use nodes=true}
+
+As mentioned in the introduction, this is the original method of drawing cobordism diagrams using nodes and is no longer updated (though I will fix bugs if I can).
+If drawing a new diagram, use the pic method from Section~\ref{sec:pic}.
 
 \subsection{The Node Shapes}
 
